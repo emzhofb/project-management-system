@@ -83,6 +83,7 @@ CREATE TABLE public.issues
   createddate timestamp without time zone,
   updateddate timestamp without time zone,
   closeddate timestamp without time zone,
+  parenttask integer,
   PRIMARY KEY (issueid),
   CONSTRAINT projectforeignkey FOREIGN KEY (projectid)
     REFERENCES public.projects (projectid) MATCH SIMPLE
@@ -115,7 +116,7 @@ CREATE TABLE public.activity
   "time" timestamp without time zone,
   title character varying(25),
   description character varying(250),
-  author character varying(25),
+  author integer,
   CONSTRAINT activity_pkey PRIMARY KEY (activityid),
   CONSTRAINT authorforeignkey FOREIGN KEY (author)
     REFERENCES public.users (userid) MATCH SIMPLE
