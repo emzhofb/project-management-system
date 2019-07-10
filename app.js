@@ -8,11 +8,14 @@ const session = require('express-session');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const projectsRouter = require('./routes/projects');
 
 const app = express();
 const sess = {
   secret: 'keyboard cat',
-  cookie: {}
+  cookie: {},
+  resave: false,
+  saveUninitialized: true
 };
 
 // view engine setup
@@ -30,6 +33,7 @@ app.use(session(sess));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/projects', projectsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
