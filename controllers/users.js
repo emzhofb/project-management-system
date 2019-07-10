@@ -7,7 +7,7 @@ exports.getLogin = (req, res, next) => {
 
 exports.postLogin = (req, res, next) => {
   const { email, password } = req.body;
-  const user = new User(email, password);
+  const user = new User(email);
 
   user
     .find()
@@ -15,12 +15,12 @@ exports.postLogin = (req, res, next) => {
       if (result.rows.length > 0) {
         const pass = result.rows[0].password;
         const checkPassword = bcrypt.compareSync(password, pass);
-        // cek hashed password
+
         if (checkPassword) {
           req.session.user = {
             email: result.rows[0].email
           };
-          // success login
+
           res.redirect('/');
         } else res.redirect('/users/login');
       } else res.redirect('/users/login');
@@ -39,5 +39,28 @@ exports.postRegister = (req, res, next) => {
   user
     .save()
     .then(() => res.redirect('/users/login'))
+    .catch(err => console.log(err));
+};
+
+exports.getLogout = (req, res, next) => {
+  req.session.destroy(err => {
+    if (err) console.log(err);
+
+    res.redirect('/');
+  });
+};
+
+exports.getProfile = (req, res, next) => {
+  const email = req.session.user.email;
+  const user = new User(email);
+
+  user
+    .find()
+    .then(result => {
+      res.render('profile/index', {
+        title: 'User Profile',
+        user: result.rows[0]
+      });
+    })
     .catch(err => console.log(err));
 };
