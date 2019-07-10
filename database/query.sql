@@ -115,9 +115,9 @@ CREATE TABLE public.activity
   activityid serial NOT NULL,
   "time" timestamp without time zone,
   title character varying(25),
-  description character varying(250),
+  description text,
   author integer,
-  CONSTRAINT activity_pkey PRIMARY KEY (activityid),
+  PRIMARY KEY (activityid),
   CONSTRAINT authorforeignkey FOREIGN KEY (author)
     REFERENCES public.users (userid) MATCH SIMPLE
     ON UPDATE NO ACTION
