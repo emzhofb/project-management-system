@@ -10,7 +10,7 @@ CREATE TABLE public.users
 (
   userid serial NOT NULL,
   email character varying(50) NOT NULL,
-  password character varying(50) NOT NULL,
+  password character varying(250) NOT NULL,
   firstname character varying(25),
   lastname character varying(25),
   PRIMARY KEY (userid),
