@@ -102,11 +102,11 @@ CREATE TABLE public.issues
     ON DELETE NO ACTION,
 )
 WITH (
-    OIDS = FALSE
+  OIDS = FALSE
 );
 
 ALTER TABLE public.issues
-    OWNER to postgres;
+  OWNER to postgres;
 
 -- create table activity
 CREATE TABLE public.activity
@@ -118,9 +118,9 @@ CREATE TABLE public.activity
   author character varying(25),
   CONSTRAINT activity_pkey PRIMARY KEY (activityid),
   CONSTRAINT authorforeignkey FOREIGN KEY (author)
-        REFERENCES public.users (userid) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+    REFERENCES public.users (userid) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
 )
 WITH (
   OIDS = FALSE
