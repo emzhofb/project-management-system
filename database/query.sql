@@ -64,27 +64,30 @@ ALTER TABLE public.members
 -- create table issues
 CREATE TABLE public.issues
 (
-  issueid integer NOT NULL DEFAULT nextval('issues_issueid_seq'::regclass),
+  issueid serial NOT NULL,
   projectid integer,
-  tracker character varying(10) COLLATE pg_catalog."default",
-  subject character varying(25) COLLATE pg_catalog."default",
-  description character varying(250) COLLATE pg_catalog."default",
-  status character varying(15) COLLATE pg_catalog."default",
-  priority character varying(10) COLLATE pg_catalog."default",
+  tracker character varying(10),
+  subject character varying(100),
+  description text,
+  status character varying(15),
+  priority character varying(10),
   assignee integer,
-  startdate date,
-  duedate date,
-  estimatedtime integer,
-  done boolean,
-  files character varying(25) COLLATE pg_catalog."default",
-  spenttime integer,
-  targetversion numeric,
+  startdate timestamp without time zone,
+  duedate timestamp without time zone,
+  estimatedtime numeric,
+  done integer,
+  files text,
+  spenttime numeric,
+  targetversion character varying(20),
   author integer,
-  createddate date,
-  updateddate date,
-  closeddate date,
-  parenttask integer,
-  CONSTRAINT issues_pkey PRIMARY KEY (issueid),
+  createddate timestamp without time zone,
+  updateddate timestamp without time zone,
+  closeddate timestamp without time zone,
+  PRIMARY KEY (issueid),
+  CONSTRAINT projectforeignkey FOREIGN KEY (projectid)
+    REFERENCES public.projects (projectid) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION,
   CONSTRAINT assigneeforeignkey FOREIGN KEY (assignee)
     REFERENCES public.users (userid) MATCH SIMPLE
     ON UPDATE NO ACTION
@@ -93,32 +96,31 @@ CREATE TABLE public.issues
     REFERENCES public.users (userid) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION,
-  CONSTRAINT projectforeignkey FOREIGN KEY (projectid)
-    REFERENCES public.projects (projectid) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION,
   CONSTRAINT parenttaskforeignkey FOREIGN KEY (parenttask)
     REFERENCES public.issues (issueid) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION
+    ON DELETE NO ACTION,
 )
 WITH (
-  OIDS = FALSE
-)
-TABLESPACE pg_default;
+    OIDS = FALSE
+);
 
 ALTER TABLE public.issues
-  OWNER to postgres;
+    OWNER to postgres;
 
 -- create table activity
 CREATE TABLE public.activity
 (
-  activityid integer NOT NULL DEFAULT nextval('activity_activityid_seq'::regclass),
+  activityid serial NOT NULL,
   "time" timestamp without time zone,
-  title character varying(25) COLLATE pg_catalog."default",
-  description character varying(250) COLLATE pg_catalog."default",
-  author character varying(25) COLLATE pg_catalog."default",
-  CONSTRAINT activity_pkey PRIMARY KEY (activityid)
+  title character varying(25),
+  description character varying(250),
+  author character varying(25),
+  CONSTRAINT activity_pkey PRIMARY KEY (activityid),
+  CONSTRAINT authorforeignkey FOREIGN KEY (author)
+        REFERENCES public.users (userid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
 )
 WITH (
   OIDS = FALSE
