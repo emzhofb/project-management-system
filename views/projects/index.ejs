@@ -74,9 +74,9 @@
             <div class="form-group col-md-3">
               <select class="form-control" name="boolean" id="boolean">
                 <option>Choose members...</option>
-                <option value="manager">Manager</option>
-                <option value="dev">Software Developer</option>
-                <option value="qa">Quality Assurance</option>
+                <% members.forEach(member => { %>
+                  <option value="<%= member.firstname %>"><%= member.firstname + ' ' + member.lastname %></option>
+                <% }) %>
               </select>
             </div>
           </div>
@@ -127,13 +127,15 @@
         <thead>
           <th scope="col">ID</th>
           <th scope="col">Name</th>
+          <th scope="col">Members</th>
           <th scope="col"></th>
         </thead>
         <tbody>
           <% projects.forEach(project => { %>
           <tr>
             <th scope="row"><%= project.projectid %></th>
-            <td><%= project.name %></td>
+            <td><%= project.projectname %></td>
+            <td></td>
             <td>
               <a href="/projects/edit/<%= project.projectid %>">
                 <button type="button" class="btn btn-success">

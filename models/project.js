@@ -1,13 +1,13 @@
 const pool = require('../util/database');
 
 module.exports = class Project {
-  constructor(name) {
-    this.name = name;
+  constructor(projectname) {
+    this.projectname = projectname;
   }
 
   save() {
-    const sql = `INSERT INTO public.projects(name)
-    VALUES ('${this.name}')`;
+    const sql = `INSERT INTO public.projects(projectname)
+    VALUES ('${this.projectname}')`;
 
     return pool.query(sql);
   }

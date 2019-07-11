@@ -59,7 +59,8 @@ exports.getProfile = (req, res, next) => {
     .then(result => {
       res.render('profile/index', {
         title: 'User Profile',
-        user: result.rows[0]
+        user: result.rows[0],
+        path: '/users/profile'
       });
     })
     .catch(err => console.log(err));
