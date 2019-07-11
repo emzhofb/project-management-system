@@ -7,7 +7,7 @@ module.exports = class Member {
     this.roleid = roleid;
   }
 
-  find() {
+  findMember() {
     const sql = `SELECT firstname, lastname 
     FROM public.users 
     INNER JOIN public.members 
