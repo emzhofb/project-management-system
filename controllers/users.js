@@ -64,3 +64,19 @@ exports.getProfile = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+exports.postProfile = (req, res, next) => {
+  const email = req.session.user.email;
+  let { password, roleid, isfulltime } = req.body;
+
+  if (password == '') password = undefined;
+  if (isfulltime == 'on') isfulltime = true;
+  if (isfulltime == undefined) isfulltime = false;
+
+  const user = new User(email, password, '', '', isfulltime, Number(roleid));
+
+  user
+    .update()
+    .then(() => res.redirect('/projects'))
+    .catch(err => console.log(err));
+};
