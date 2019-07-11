@@ -22,6 +22,7 @@
               type="projectname"
               class="form-control"
               id="projectname"
+              name="projectname"
               placeholder="Project Name"
             />
           </div>
@@ -35,11 +36,11 @@
                 <input
                   class="form-check-input"
                   type="checkbox"
-                  name="gridRadios"
-                  id="gridRadios2"
-                  value="option2"
+                  name="memberid"
+                  id="memberid"
+                  value="<%= member.userid %>"
                 />
-                <label class="form-check-label" for="gridRadios2">
+                <label class="form-check-label" for="memberid">
                   <%= member.firstname + ' ' + member.lastname %>
                 </label>
               </div>

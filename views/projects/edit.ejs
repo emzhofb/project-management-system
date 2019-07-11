@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../partials/navigation') %>
+    <div class="container" style="padding: 20px">
+      <h2><%= title %></h2>
+      <br />
+      <form action="/projects/add" method="POST">
+        <div class="form-group row">
+          <label for="projectname" class="col-sm-2 col-form-label">Name</label>
+          <div class="col-sm-5">
+            <input
+              type="projectname"
+              class="form-control"
+              id="projectname"
+              name="projectname"
+              value="<%= projectname %>"
+            />
+          </div>
+        </div>
+        <fieldset class="form-group">
+          <div class="row">
+            <legend class="col-form-label col-sm-2 pt-0">Members</legend>
+            <div class="col-sm-5">
+              <% members.forEach(member => { %>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="memberid"
+                  id="memberid"
+                  value="<%= member.userid %>"
+                />
+                <label class="form-check-label" for="memberid">
+                  <%= member.firstname + ' ' + member.lastname %>
+                </label>
+              </div>
+              <% }) %>
+            </div>
+          </div>
+        </fieldset>
+        <div class="form-group row">
+          <div class="col-sm-5">
+            <button type="submit" class="btn btn-primary">Edit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>

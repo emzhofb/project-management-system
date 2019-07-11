@@ -134,7 +134,13 @@
             <% } %> <% if (options.nameChecked == 'on') { %>
             <td><%= project.projectname %></td>
             <% } %> <% if (options.memberChecked == 'on') { %>
-            <td></td>
+            <td>
+              <% for (let i = 0; i < projectmember.length; i++) { %>
+                <% if (project.projectname == projectmember[i].projectname) { %>
+                  <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>
+                <% } %>
+              <% } %>
+            </td>
             <% } %>
             <td>
               <a href="/projects/edit/<%= project.projectid %>">
