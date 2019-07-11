@@ -14,7 +14,11 @@ CREATE TABLE public.users
   firstname character varying(25),
   lastname character varying(25),
   PRIMARY KEY (userid),
-  UNIQUE (email)
+  UNIQUE (email),
+  CONSTRAINT roleforeignkey FOREIGN KEY (roleid)
+    REFERENCES public.roles (roleid) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
 )
 WITH (
   OIDS = FALSE
@@ -42,11 +46,15 @@ CREATE TABLE public.members
 (
   id serial NOT NULL,
   userid integer,
-  role character varying(20),
+  roleid integer,
   projectid integer,
   PRIMARY KEY (id),
   CONSTRAINT userforeignkey FOREIGN KEY (userid)
     REFERENCES public.users (userid) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION,
+  CONSTRAINT roleforeignkey FOREIGN KEY (roleid)
+    REFERENCES public.roles (roleid) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION,
   CONSTRAINT projectforeignkey FOREIGN KEY (projectid)
@@ -126,4 +134,18 @@ WITH (
 TABLESPACE pg_default;
 
 ALTER TABLE public.activity
+  OWNER to postgres;
+
+-- create table roles
+CREATE TABLE public.roles
+(
+  roleid serial NOT NULL,
+  rolename character varying(50),
+  PRIMARY KEY (roleid)
+)
+WITH (
+  OIDS = FALSE
+);
+
+ALTER TABLE public.roles
   OWNER to postgres;
