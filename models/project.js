@@ -13,6 +13,12 @@ module.exports = class Project {
     return pool.query(sql);
   }
 
+  delete() {
+    const sql = `DELETE FROM public.projects WHERE projectid = ${this.projectid}`;
+
+    return pool.query(sql);
+  }
+
   update() {
     const sql = `UPDATE public.projects
     SET projectname = '${this.projectname}'

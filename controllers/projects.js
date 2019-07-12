@@ -189,3 +189,18 @@ exports.getColumn = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+exports.getDeleteProject = (req, res, next) => {
+  const member = new Member(undefined, Number(req.params.id));
+
+  member
+    .delete()
+    .then(() => {
+      const project = new Project(undefined, Number(req.params.id));
+      project
+        .delete()
+        .then(() => res.redirect('/projects'))
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
