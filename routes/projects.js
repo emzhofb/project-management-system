@@ -9,5 +9,6 @@ router.get('/column', controller.getColumn);
 router.get('/add', controller.getAddProject);
 router.post('/add', controller.postAddProject);
 router.get('/edit/:id', controller.getEditProject);
+router.post('/edit/:id', controller.postEditProject);
 
 module.exports = router;

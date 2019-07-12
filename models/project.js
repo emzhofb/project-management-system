@@ -13,8 +13,16 @@ module.exports = class Project {
     return pool.query(sql);
   }
 
+  update() {
+    const sql = `UPDATE public.projects
+    SET projectname = '${this.projectname}'
+    WHERE projectid = ${this.projectid}`;
+
+    return pool.query(sql);
+  }
+
   find() {
-    const sql = `SELECT * FROM public.projects`;
+    const sql = `SELECT * FROM public.projects ORDER BY projectid`;
 
     return pool.query(sql);
   }

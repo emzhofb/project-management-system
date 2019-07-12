@@ -14,6 +14,12 @@ module.exports = class Member {
     return pool.query(sql);
   }
 
+  delete() {
+    const sql = `DELETE FROM public.members WHERE projectid = ${this.projectid}`;
+
+    return pool.query(sql);
+  }
+
   findAllMembers() {
     const sql = `SELECT users.userid, firstname, lastname 
     FROM public.users ORDER BY userid`;

@@ -137,7 +137,11 @@
             <td>
               <% for (let i = 0; i < projectmember.length; i++) { %>
                 <% if (project.projectname == projectmember[i].projectname) { %>
-                  <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>
+                  <% if (i < members.length - 1) { %>
+                    <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>,
+                  <% } else { %>
+                    <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>.
+                  <% } %>
                 <% } %>
               <% } %>
             </td>

@@ -16,7 +16,7 @@ exports.getProjects = (req, res, next) => {
       const nameChecked = allQueries.rows[0].columnname;
       const memberChecked = allQueries.rows[0].columnmember;
       member
-        .findMember()
+        .findAllMembers()
         .then(members => {
           project
             .find()
@@ -68,7 +68,7 @@ exports.postAddProject = (req, res, next) => {
         .findByName()
         .then(projects => {
           const values = [];
-          if (memberid.length > 1) {
+          if (typeof memberid == 'object') {
             for (let i = 0; i < memberid.length; i++) {
               values.push(
                 `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
@@ -106,8 +106,15 @@ exports.getEditProject = (req, res, next) => {
             .then(projectmembers => {
               const name = [];
               for (let i = 0; i < projectmembers.rows.length; i++) {
-                if (projectmembers.rows[i].projectname === project.rows[0].projectname) {
-                  name.push(projectmembers.rows[i].firstname + ' ' + projectmembers.rows[i].lastname);
+                if (
+                  projectmembers.rows[i].projectname ===
+                  project.rows[0].projectname
+                ) {
+                  name.push(
+                    projectmembers.rows[i].firstname +
+                      ' ' +
+                      projectmembers.rows[i].lastname
+                  );
                 }
               }
 
@@ -127,7 +134,45 @@ exports.getEditProject = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
-exports.postEditProject = (req, res, next) => {};
+exports.postEditProject = (req, res, next) => {
+  const { projectname, memberid } = req.body;
+  const member = new Member(undefined, Number(req.params.id));
+
+  member
+    .delete()
+    .then(() => {
+      const project = new Project(projectname, Number(req.params.id));
+      project
+        .update()
+        .then(() => {
+          project
+            .findByName()
+            .then(projects => {
+              const values = [];
+              if (typeof memberid == 'object') {
+                for (let i = 0; i < memberid.length; i++) {
+                  values.push(
+                    `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
+                  );
+                }
+              } else {
+                values.push(
+                  `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
+                );
+              }
+              const sql = `INSERT INTO public.members(userid, projectid, roleid)
+                      VALUES ${values.join(',')}`;
+              pool
+                .query(sql)
+                .then(() => res.redirect('/projects'))
+                .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
 
 exports.getColumn = (req, res, next) => {
   const { idChecked, nameChecked, memberChecked } = req.query;
