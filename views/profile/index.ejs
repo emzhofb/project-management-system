@@ -48,50 +48,22 @@
             <div class="row">
               <legend class="col-form-label col-sm-2 pt-0">Position</legend>
               <div class="col-sm-10">
-                <div class="form-check">
-                  <input
-                    name="roleid"
-                    class="form-check-input"
-                    type="radio"
-                    name="gridRadios"
-                    id="gridRadios1"
-                    value="1"
-                    <%= user.roleid == 1 ? 'checked' : '' %>
-                  />
-                  <label class="form-check-label" for="gridRadios1">
-                    Manager
-                  </label>
-                </div>
-                <div class="form-check">
-                  <input
-                    name="roleid"
-                    class="form-check-input"
-                    type="radio"
-                    name="gridRadios"
-                    id="gridRadios2"
-                    value="2"
-                    <%= user.roleid == 2 ? 'checked' : '' %>
-                  />
-                  <label class="form-check-label" for="gridRadios2">
-                    Programmer
-                  </label>
-                </div>
-                <div class="form-check disabled">
-                  <input
-                    name="roleid"
-                    class="form-check-input"
-                    type="radio"
-                    name="gridRadios"
-                    id="gridRadios3"
-                    value="3"
-                    <%= user.roleid == 3 ? 'checked' : '' %>
-                  />
-                  <label class="form-check-label" for="gridRadios3">
-                    Quality Assurance
-                  </label>
-                </div>
-              </div>
-            </div>
+                <% roles.forEach(role => { %>
+                  <div class="form-check">
+                    <input
+                      name="roleid"
+                      class="form-check-input"
+                      type="radio"
+                      name="gridRadios"
+                      id="gridRadios1"
+                      value="<%= role.roleid %>"
+                      <%= user.roleid == role.roleid ? 'checked' : '' %>
+                    />
+                    <label class="form-check-label" for="gridRadios1">
+                      <%= role.rolename %>
+                    </label>
+                  </div>
+                <% }) %>
           </fieldset>
           <div class="form-group row">
             <div class="col-sm-2">Type</div>

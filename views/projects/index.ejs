@@ -74,18 +74,20 @@
             <div class="form-group col-md-3">
               <select class="form-control" name="boolean" id="boolean">
                 <option>Choose members...</option>
-                <option value="manager">Manager</option>
-                <option value="dev">Software Developer</option>
-                <option value="qa">Quality Assurance</option>
+                <% members.forEach(member => { %>
+                <option value="<%= member.firstname %>"
+                  ><%= member.firstname + ' ' + member.lastname %></option
+                >
+                <% }) %>
               </select>
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Search</button>
-          <a href="/" class="btn btn-info">Reset</a>
+          <a href="/projects" class="btn btn-info">Reset</a>
         </div>
       </form>
       <br />
-      <form action="/projects">
+      <form action="/projects/column" method="GET">
         <div class="container">
           <h2>Options</h2>
           <div class="row">
@@ -94,28 +96,18 @@
             </div>
             <div class="col-sm-2">
               <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  name="idChecked"
-                />
-                ID
+                <input class="form-check-input" type="checkbox" name="idChecked"
+                <%= options.idChecked == 'on' ? 'checked' : '' %> /> ID
               </div>
               <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  name="idChecked"
-                />
-                Name
+                <input class="form-check-input" type="checkbox"
+                name="nameChecked" <%= options.nameChecked == 'on' ? 'checked' :
+                '' %> /> Name
               </div>
               <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  name="idChecked"
-                />
-                Members
+                <input class="form-check-input" type="checkbox"
+                name="memberChecked" <%= options.memberChecked == 'on' ?
+                'checked' : '' %> /> Members
               </div>
             </div>
           </div>
@@ -125,15 +117,35 @@
       <br />
       <table class="table table-striped">
         <thead>
+          <% if (options.idChecked == 'on') { %>
           <th scope="col">ID</th>
+          <% } %> <% if (options.nameChecked == 'on') { %>
           <th scope="col">Name</th>
+          <% } %> <% if (options.memberChecked == 'on') { %>
+          <th scope="col">Members</th>
+          <% } %>
           <th scope="col"></th>
         </thead>
         <tbody>
           <% projects.forEach(project => { %>
           <tr>
+            <% if (options.idChecked == 'on') { %>
             <th scope="row"><%= project.projectid %></th>
-            <td><%= project.name %></td>
+            <% } %> <% if (options.nameChecked == 'on') { %>
+            <td><%= project.projectname %></td>
+            <% } %> <% if (options.memberChecked == 'on') { %>
+            <td>
+              <% for (let i = 0; i < projectmember.length; i++) { %>
+                <% if (project.projectname == projectmember[i].projectname) { %>
+                  <% if (i < members.length - 1) { %>
+                    <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>,
+                  <% } else { %>
+                    <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>.
+                  <% } %>
+                <% } %>
+              <% } %>
+            </td>
+            <% } %>
             <td>
               <a href="/projects/edit/<%= project.projectid %>">
                 <button type="button" class="btn btn-success">
@@ -154,7 +166,7 @@
           <% }) %>
         </tbody>
       </table>
-      <a href="/" class="btn btn-secondary">Add</a>
+      <a href="add" class="btn btn-secondary">Add</a>
     </div>
   </body>
 </html>

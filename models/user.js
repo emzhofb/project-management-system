@@ -18,9 +18,8 @@ module.exports = class User {
     const sql = `INSERT INTO public.users(
       email, password, firstname, lastname, isfulltime, roleid)
       VALUES (
-        '${this.email}', '${hashedPassword}', '${this.firstname}', '${
-      this.lastname
-    }', ${this.isfulltime}, ${this.roleid}
+        '${this.email}', '${hashedPassword}', '${this.firstname}', 
+        '${this.lastname}', ${this.isfulltime}, ${this.roleid}
       )`;
 
     return pool.query(sql);

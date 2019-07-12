@@ -152,3 +152,19 @@ WITH (
 
 ALTER TABLE public.roles
   OWNER to postgres;
+
+-- create table queries
+CREATE TABLE public.queries
+(
+  queryid serial NOT NULL,
+  columnid character varying(5),
+  columnname character varying(5),
+  columnmember character varying(5),
+  PRIMARY KEY (queryid)
+)
+WITH (
+  OIDS = FALSE
+);
+
+ALTER TABLE public.queries
+  OWNER to postgres;

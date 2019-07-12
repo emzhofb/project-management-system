@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
+const Role = require('../models/role');
 
 exports.getLogin = (req, res, next) => {
   res.render('auth/login', { title: 'Users Login' });
@@ -29,12 +30,27 @@ exports.postLogin = (req, res, next) => {
 };
 
 exports.getRegister = (req, res, next) => {
-  res.render('auth/register', { title: 'Register' });
+  const role = new Role();
+
+  role
+    .findRole()
+    .then(roles => {
+      res.render('auth/register', { title: 'Register', roles: roles.rows });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.postRegister = (req, res, next) => {
-  const { email, password, firstname, lastname } = req.body;
-  const user = new User(email, password, firstname, lastname);
+  const { email, password, firstname, lastname, roleid } = req.body;
+  const isfulltime = req.body.isfulltime == 'true' ? true : false;
+  const user = new User(
+    email,
+    password,
+    firstname,
+    lastname,
+    isfulltime,
+    Number(roleid)
+  );
 
   user
     .save()
@@ -53,14 +69,22 @@ exports.getLogout = (req, res, next) => {
 exports.getProfile = (req, res, next) => {
   const email = req.session.user.email;
   const user = new User(email);
+  const role = new Role();
 
-  user
-    .find()
-    .then(result => {
-      res.render('profile/index', {
-        title: 'User Profile',
-        user: result.rows[0]
-      });
+  role
+    .findRole()
+    .then(roles => {
+      user
+        .find()
+        .then(users => {
+          res.render('profile/index', {
+            title: 'User Profile',
+            user: users.rows[0],
+            roles: roles.rows,
+            path: '/users/profile'
+          });
+        })
+        .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };
