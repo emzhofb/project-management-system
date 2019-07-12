@@ -39,6 +39,7 @@
                   name="memberid"
                   id="memberid"
                   value="<%= member.userid %>"
+                  <%= helpers.checkMember(membername, member.firstname + ' ' + member.lastname) ? 'checked' : '' %>
                 />
                 <label class="form-check-label" for="memberid">
                   <%= member.firstname + ' ' + member.lastname %>

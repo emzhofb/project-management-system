@@ -2,6 +2,7 @@ const Project = require('../models/project');
 const Member = require('../models/member');
 const Queries = require('../models/query');
 const pool = require('../util/database');
+const helpers = require('../helpers/function');
 
 exports.getProjects = (req, res, next) => {
   const project = new Project();
@@ -100,17 +101,33 @@ exports.getEditProject = (req, res, next) => {
       member
         .findAllMembers()
         .then(members => {
-          res.render('projects/edit', {
-            title: 'Edit Product',
-            path: `/projects/edit/${req.params.id}`,
-            members: members.rows,
-            projectname: project.rows[0].projectname
-          });
+          member
+            .projectMember()
+            .then(projectmembers => {
+              const name = [];
+              for (let i = 0; i < projectmembers.rows.length; i++) {
+                if (projectmembers.rows[i].projectname === project.rows[0].projectname) {
+                  name.push(projectmembers.rows[i].firstname + ' ' + projectmembers.rows[i].lastname);
+                }
+              }
+
+              res.render('projects/edit', {
+                title: 'Edit Product',
+                path: `/projects/edit/${req.params.id}`,
+                members: members.rows,
+                projectname: project.rows[0].projectname,
+                membername: name,
+                helpers: helpers
+              });
+            })
+            .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };
+
+exports.postEditProject = (req, res, next) => {};
 
 exports.getColumn = (req, res, next) => {
   const { idChecked, nameChecked, memberChecked } = req.query;
