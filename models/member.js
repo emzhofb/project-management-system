@@ -15,7 +15,7 @@ module.exports = class Member {
   }
 
   findAllMembers() {
-    const sql = `SELECT firstname, lastname 
+    const sql = `SELECT users.userid, firstname, lastname 
     FROM public.users ORDER BY userid`;
 
     return pool.query(sql);

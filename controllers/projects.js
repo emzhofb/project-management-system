@@ -1,6 +1,7 @@
 const Project = require('../models/project');
 const Member = require('../models/member');
 const Queries = require('../models/query');
+const pool = require('../util/database');
 
 exports.getProjects = (req, res, next) => {
   const project = new Project();
@@ -44,7 +45,7 @@ exports.getAddProject = (req, res, next) => {
   const member = new Member();
 
   member
-    .findMember()
+    .findAllMembers()
     .then(members => {
       res.render('projects/add', {
         title: 'Add Project',
@@ -63,21 +64,26 @@ exports.postAddProject = (req, res, next) => {
     .save()
     .then(() => {
       project
-        .find()
+        .findByName()
         .then(projects => {
-          for (let i = 0; i < projects.rows.length; i++) {
-            if (projects.rows[i].projectname === projectname) {
-              const member = new Member(
-                Number(memberid),
-                Number(projects.rows[i].projectid),
-                2
+          const values = [];
+          if (memberid.length > 1) {
+            for (let i = 0; i < memberid.length; i++) {
+              values.push(
+                `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
               );
-              member
-                .save()
-                .then(() => res.redirect('/projects'))
-                .catch(err => console.log(err));
             }
+          } else {
+            values.push(
+              `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
+            );
           }
+          const sql = `INSERT INTO public.members(userid, projectid, roleid)
+                      VALUES ${values.join(',')}`;
+          pool
+            .query(sql)
+            .then(() => res.redirect('/projects'))
+            .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     })

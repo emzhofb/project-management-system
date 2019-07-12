@@ -25,4 +25,11 @@ module.exports = class Project {
 
     return pool.query(sql);
   }
+
+  findByName() {
+    const sql = `SELECT * FROM public.projects 
+    WHERE projects.projectname = '${this.projectname}'`;
+
+    return pool.query(sql);
+  }
 };
