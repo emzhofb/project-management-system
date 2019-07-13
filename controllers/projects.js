@@ -5,33 +5,105 @@ const pool = require('../util/database');
 const helpers = require('../helpers/function');
 
 exports.getProjects = (req, res, next) => {
-  const project = new Project();
-  const member = new Member();
   const queries = new Queries();
+  const member = new Member();
+  const {
+    idChecked,
+    nameChecked,
+    memberChecked,
+    id,
+    name,
+    memberFilter
+  } = req.query;
+  const filterProject = [];
+  const fieldProject = [];
+
+  if (idChecked && id)
+    if (Number(id)) {
+      filterProject.push(Number(id));
+      fieldProject.push('projectid');
+    }
+  if (nameChecked && name) {
+    filterProject.push(name);
+    fieldProject.push('projectname');
+  }
 
   queries
     .findQuery()
     .then(allQueries => {
-      const idChecked = allQueries.rows[0].columnid;
-      const nameChecked = allQueries.rows[0].columnname;
-      const memberChecked = allQueries.rows[0].columnmember;
+      const idCheckedColumn = allQueries.rows[0].columnid;
+      const nameCheckedColumn = allQueries.rows[0].columnname;
+      const memberCheckedColumn = allQueries.rows[0].columnmember;
       member
         .findAllMembers()
         .then(members => {
-          project
-            .find()
-            .then(projects => {
-              member
-                .projectMember()
-                .then(result => {
-                  res.render('projects/index', {
-                    title: 'Projects',
-                    projects: projects.rows,
-                    members: members.rows,
-                    projectmember: result.rows,
-                    options: { idChecked, nameChecked, memberChecked },
-                    path: '/projects'
-                  });
+          let sql = `SELECT count(*) FROM public.projects`;
+          if (filterProject.length > 0) {
+            sql += ` WHERE`;
+            for (let i = 0; i < fieldProject.length; i++) {
+              sql += ` ${fieldProject[i]} = '${filterProject[i]}'`;
+              if (i !== fieldProject.length - 1) sql += ` AND`;
+            }
+          }
+          const page = Number(req.query.page) || 1;
+          const perPage = 3;
+          const queries = req.query;
+
+          pool
+            .query(sql)
+            .then(count => {
+              const total = count.rows[0].count;
+              const pages = Math.ceil(total / perPage);
+              const offset = (page - 1) * perPage;
+              const url = req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
+
+              sql = `SELECT * FROM public.projects`;
+              if (filterProject.length > 0) {
+                sql += ` WHERE`;
+                for (let i = 0; i < fieldProject.length; i++) {
+                  sql += ` ${fieldProject[i]} = '${filterProject[i]}'`;
+                  if (i !== fieldProject.length - 1) sql += ` AND`;
+                }
+              }
+              sql += ` ORDER BY projectid`;
+              sql += ` LIMIT ${perPage} OFFSET ${offset}`;
+
+              pool
+                .query(sql)
+                .then(projects => {
+                  let sqlMember = `SELECT firstname, lastname, projectname 
+                                FROM public.users, public.members, public.projects
+                                WHERE projects.projectid = members.projectid
+                                AND members.userid = users.userid`;
+                  const filterMember = [];
+
+                  if (memberChecked && memberFilter) {
+                    filterMember.push(`'${memberFilter}'`);
+                  }
+                  if (filterMember.length > 0) {
+                    sqlMember += ` AND users.firstname = ${filterMember[0]}`;
+                  }
+                  pool
+                    .query(sqlMember)
+                    .then(result => {
+                      res.render('projects/index', {
+                        title: 'Projects',
+                        projects: projects.rows,
+                        members: members.rows,
+                        projectmember: result.rows,
+                        options: {
+                          idCheckedColumn,
+                          nameCheckedColumn,
+                          memberCheckedColumn
+                        },
+                        path: '/projects',
+                        query: req.query,
+                        current: page,
+                        pages,
+                        url
+                      });
+                    })
+                    .catch(err => console.log(err));
                 })
                 .catch(err => console.log(err));
             })
