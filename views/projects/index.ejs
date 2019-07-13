@@ -13,7 +13,8 @@
     <%- include('../partials/navigation') %>
     <div class="container" style="padding: 20px">
       <h2>Filters</h2>
-      <form action="/projects">
+      <form action="/projects" method="GET">
+        <input type="hidden" name="page" value="1">
         <div class="container">
           <div class="row">
             <div class="col-sm-2">
@@ -22,6 +23,7 @@
                   class="form-check-input"
                   type="checkbox"
                   name="idChecked"
+                  <%= query.idChecked == 'on' ? 'checked' : ''%>
                 />
                 ID
               </div>
@@ -34,6 +36,7 @@
                   id="id"
                   name="id"
                   placeholder="ID"
+                  value="<%= query.id && query.idChecked == 'on' ? query.id : ''%>"
                 />
               </div>
             </div>
@@ -44,7 +47,8 @@
                 <input
                   class="form-check-input"
                   type="checkbox"
-                  name="idChecked"
+                  name="nameChecked"
+                  <%= query.nameChecked == 'on' ? 'checked' : ''%>
                 />
                 Name
               </div>
@@ -54,9 +58,10 @@
                 <input
                   type="text"
                   class="form-control"
-                  id="id"
-                  name="id"
+                  id="name"
+                  name="name"
                   placeholder="Name"
+                  value="<%= query.name && query.nameChecked == 'on' ? query.name : ''%>"
                 />
               </div>
             </div>
@@ -67,15 +72,20 @@
                 <input
                   class="form-check-input"
                   type="checkbox"
-                  name="booleanChecked"
+                  name="memberChecked"
+                  <%= query.memberChecked == 'on' ? 'checked' : ''%>
                 />Members
               </div>
             </div>
             <div class="form-group col-md-3">
-              <select class="form-control" name="boolean" id="boolean">
+              <select class="form-control" name="memberFilter" id="memberFilter">
                 <option>Choose members...</option>
                 <% members.forEach(member => { %>
-                <option value="<%= member.firstname %>"
+                <option 
+                  value="<%= member.firstname %>"
+                  <% if (query.memberFilter == member.firstname) { %>
+                    selected
+                  <% } %>
                   ><%= member.firstname + ' ' + member.lastname %></option
                 >
                 <% }) %>
@@ -97,16 +107,16 @@
             <div class="col-sm-2">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="idChecked"
-                <%= options.idChecked == 'on' ? 'checked' : '' %> /> ID
+                <%= options.idCheckedColumn == 'on' ? 'checked' : '' %> /> ID
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox"
-                name="nameChecked" <%= options.nameChecked == 'on' ? 'checked' :
+                name="nameChecked" <%= options.nameCheckedColumn == 'on' ? 'checked' :
                 '' %> /> Name
               </div>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox"
-                name="memberChecked" <%= options.memberChecked == 'on' ?
+                name="memberChecked" <%= options.memberCheckedColumn == 'on' ?
                 'checked' : '' %> /> Members
               </div>
             </div>
@@ -117,11 +127,11 @@
       <br />
       <table class="table table-striped">
         <thead>
-          <% if (options.idChecked == 'on') { %>
+          <% if (options.idCheckedColumn == 'on') { %>
           <th scope="col">ID</th>
-          <% } %> <% if (options.nameChecked == 'on') { %>
+          <% } %> <% if (options.nameCheckedColumn == 'on') { %>
           <th scope="col">Name</th>
-          <% } %> <% if (options.memberChecked == 'on') { %>
+          <% } %> <% if (options.memberCheckedColumn == 'on') { %>
           <th scope="col">Members</th>
           <% } %>
           <th scope="col"></th>
@@ -129,19 +139,15 @@
         <tbody>
           <% projects.forEach(project => { %>
           <tr>
-            <% if (options.idChecked == 'on') { %>
+            <% if (options.idCheckedColumn == 'on') { %>
             <th scope="row"><%= project.projectid %></th>
-            <% } %> <% if (options.nameChecked == 'on') { %>
+            <% } %> <% if (options.nameCheckedColumn == 'on') { %>
             <td><%= project.projectname %></td>
-            <% } %> <% if (options.memberChecked == 'on') { %>
+            <% } %> <% if (options.memberCheckedColumn == 'on') { %>
             <td>
               <% for (let i = 0; i < projectmember.length; i++) { %>
                 <% if (project.projectname == projectmember[i].projectname) { %>
-                  <% if (i < members.length - 1) { %>
-                    <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>,
-                  <% } else { %>
-                    <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>.
-                  <% } %>
+                  <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>.
                 <% } %>
               <% } %>
             </td>
@@ -166,6 +172,56 @@
           <% }) %>
         </tbody>
       </table>
+      <nav aria-label="...">
+        <% if (pages > 0) { %>
+          <ul class="pagination">
+            <% if (current == 1) { %>
+              <li class="page-item disabled">
+                <a class="page-link">First</a>
+              </li>
+            <% } else { %>
+              <li class="page-item">
+                <a class="page-link" href="<%= url.replace(`?page=1`, `?page=1`) %>" >First</a>
+              </li>
+            <% } %> 
+            <% let i = (Number(current) > 3 ? Number(current) - 2 : 1) %>
+            <% if (i !== 1) { %>
+              <li class="page-item disabled">
+                <a>...</a>
+              </li>
+            <% } %> 
+            <% for (; i <= (Number(current) + 2) && i <= pages; i++) { %>
+              <% if (i == current) { %>
+                <li class="page-item active" aria-current="page">
+                  <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>" name="page"
+                    ><%= i %><span class="sr-only">(current)</span></a
+                  >
+                </li>
+              <% } else { %>
+                <li class="page-item" aria-current="page">
+                  <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>" name="page"
+                    ><%= i %><span class="sr-only">(current)</span></a
+                  >
+                </li>
+              <% } %> 
+            <% } %> 
+            <% if (i == Number(current) + 3 && i < pages) { %>
+              <li class="page-item disabled">
+                <a>...</a>
+              </li>
+            <% } %> 
+            <% if (current == pages) { %>
+              <li class="page-item disabled">
+                <a class="page-link">Last</a>
+              </li>
+            <% } else { %>
+              <li class="page-item">
+                <a class="page-link" href="<%= url.replace(`?page=${pages}`, `?page=${pages}`) %>">Last</a>
+              </li>
+            <% } %>
+          </ul>
+        <% } %>
+      </nav>
       <a href="add" class="btn btn-secondary">Add</a>
     </div>
   </body>
