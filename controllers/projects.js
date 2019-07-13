@@ -47,7 +47,6 @@ exports.getProjects = (req, res, next) => {
           }
           const page = Number(req.query.page) || 1;
           const perPage = 3;
-          const queries = req.query;
 
           pool
             .query(sql)
