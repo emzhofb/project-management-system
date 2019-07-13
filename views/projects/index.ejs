@@ -181,7 +181,7 @@
               </li>
             <% } else { %>
               <li class="page-item">
-                <a class="page-link" href="<%= url.replace(`?page=1`, `?page=1`) %>" >First</a>
+                <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=1`) %>" >First</a>
               </li>
             <% } %> 
             <% let i = (Number(current) > 3 ? Number(current) - 2 : 1) %>
@@ -216,7 +216,7 @@
               </li>
             <% } else { %>
               <li class="page-item">
-                <a class="page-link" href="<%= url.replace(`?page=${pages}`, `?page=${pages}`) %>">Last</a>
+                <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${pages}`) %>">Last</a>
               </li>
             <% } %>
           </ul>
