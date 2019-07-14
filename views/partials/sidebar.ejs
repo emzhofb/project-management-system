@@ -1,0 +1,63 @@
+<nav class="col-md-2 d-none d-md-block bg-light sidebar">
+  <div class="sidebar-sticky">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a
+        href="/projects/overview/<%= id %>"
+        <% if (pathAgain == '/overview') { %>
+          class="nav-link bg-info text-white"
+        <% } else { %>
+          class="nav-link"
+        <% } %>
+      >
+          Overview
+        </a>
+      </li>
+      <li class="nav-item">
+        <a 
+        href="/projects/activity/<%= id %>"
+        <% if (pathAgain == '/activity') { %>
+          class="nav-link bg-info text-white"
+        <% } else { %>
+          class="nav-link"
+        <% } %>
+        >
+          Activity
+        </a>
+      </li>
+    </ul>
+
+    <h6
+      class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 "
+    >
+      <span></span>
+      <a class="d-flex align-items-center " href=""> </a>
+    </h6>
+    <ul class="nav flex-column mb-2">
+      <li class="nav-item ">
+        <a 
+        href="/projects/members/<%= id %>"
+        <% if (pathAgain == '/members') { %>
+          class="nav-link bg-info text-white"
+        <% } else { %>
+          class="nav-link"
+        <% } %>
+        >
+          Members
+        </a>
+      </li>
+      <li class="nav-item">
+        <a 
+        href="/projects/issues/<%= id %>"
+        <% if (pathAgain == '/issues') { %>
+          class="nav-link bg-info text-white"
+        <% } else { %>
+          class="nav-link"
+        <% } %>
+        >
+          Issues
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>

@@ -54,7 +54,8 @@ exports.getProjects = (req, res, next) => {
               const total = count.rows[0].count;
               const pages = Math.ceil(total / perPage);
               const offset = (page - 1) * perPage;
-              const url = req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
+              const url =
+                req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
 
               sql = `SELECT * FROM public.projects`;
               if (filterProject.length > 0) {
@@ -274,4 +275,14 @@ exports.getDeleteProject = (req, res, next) => {
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
+};
+
+exports.getDetailProject = (req, res, next) => {
+  const id = req.params.id;
+  res.render('projects/details/overview', {
+    title: 'Overview',
+    path: '/projects',
+    pathAgain: '/overview',
+    id: id
+  });
 };

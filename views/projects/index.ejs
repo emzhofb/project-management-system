@@ -140,7 +140,11 @@
           <% projects.forEach(project => { %>
           <tr>
             <% if (options.idCheckedColumn == 'on') { %>
-            <th scope="row"><%= project.projectid %></th>
+            <th scope="row">
+              <a href="/projects/overview/<%= project.projectid %>"">
+                <%= project.projectid %>
+              </a>
+            </th>
             <% } %> <% if (options.nameCheckedColumn == 'on') { %>
             <td><%= project.projectname %></td>
             <% } %> <% if (options.memberCheckedColumn == 'on') { %>
