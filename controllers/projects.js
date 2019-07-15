@@ -1,7 +1,8 @@
-const Project = require('../models/project');
+const User = require('../models/user');
+const Role = require('../models/role');
 const Member = require('../models/member');
 const Queries = require('../models/query');
-const Role = require('../models/role');
+const Project = require('../models/project');
 const MemberOptions = require('../models/memberoption');
 const pool = require('../util/database');
 const helpers = require('../helpers/function');
@@ -391,5 +392,32 @@ exports.postAddMember = (req, res, next) => {
   const id = req.params.id;
   const { memberChoosed, roleChoosed } = req.body;
 
-  console.log(id, memberChoosed, roleChoosed);
+  const sql = `INSERT INTO public.members(userid, projectid, roleid)
+    VALUES (${Number(memberChoosed)}, ${Number(id)}, ${Number(roleChoosed)})`;
+
+  pool
+    .query(sql)
+    .then(() => {
+      res.redirect(`/projects/members/${id}`);
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getDeleteMember = (req, res, next) => {
+  const { firstname, id } = req.params;
+  const user = new User(undefined, undefined, firstname);
+
+  user
+    .findByName()
+    .then(user => {
+      const member = new Member(user.rows[0].userid, Number(id));
+
+      member
+        .deleteByUserid()
+        .then(() => {
+          res.redirect(`/projects/members/${id}`);
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
 };

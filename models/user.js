@@ -30,6 +30,13 @@ module.exports = class User {
     return pool.query(sql);
   }
 
+  findByName() {
+    const sql = `SELECT userid FROM public.users
+    WHERE users.firstname = '${this.firstname}'`;
+
+    return pool.query(sql);
+  }
+
   update() {
     let sql;
     if (this.password !== undefined) {
