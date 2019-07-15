@@ -1,6 +1,8 @@
 const Project = require('../models/project');
 const Member = require('../models/member');
 const Queries = require('../models/query');
+const Role = require('../models/role');
+const MemberOptions = require('../models/memberoption');
 const pool = require('../util/database');
 const helpers = require('../helpers/function');
 
@@ -54,7 +56,8 @@ exports.getProjects = (req, res, next) => {
               const total = count.rows[0].count;
               const pages = Math.ceil(total / perPage);
               const offset = (page - 1) * perPage;
-              const url = req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
+              const url =
+                req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
 
               sql = `SELECT * FROM public.projects`;
               if (filterProject.length > 0) {
@@ -122,7 +125,7 @@ exports.getAddProject = (req, res, next) => {
       res.render('projects/add', {
         title: 'Add Project',
         members: members.rows,
-        path: '/projects/add'
+        path: '/projects'
       });
     })
     .catch(err => console.log(err));
@@ -274,4 +277,119 @@ exports.getDeleteProject = (req, res, next) => {
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
+};
+
+exports.getDetailProject = (req, res, next) => {
+  const projectId = req.params.id;
+  const member = new Member(undefined, projectId);
+
+  member
+    .findMemberByProject()
+    .then(members => {
+      res.render('projects/details/overview', {
+        title: 'Overview',
+        path: '/projects',
+        pathAgain: '/overview',
+        id: projectId,
+        listMember: members.rows
+      });
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getMemberProject = (req, res, next) => {
+  const role = new Role();
+  const memberOption = new MemberOptions();
+  const projectId = req.params.id;
+
+  role
+    .findRole()
+    .then(roles => {
+      memberOption
+        .findQuery()
+        .then(allQueries => {
+          const idCheckedColumn = allQueries.rows[0].columnid;
+          const nameCheckedColumn = allQueries.rows[0].columnname;
+          const positionCheckedColumn = allQueries.rows[0].columnposition;
+
+          const member = new Member(undefined, projectId);
+          member
+            .findMemberByProject()
+            .then(members => {
+              res.render('projects/details/member', {
+                title: 'Members',
+                path: '/projects',
+                pathAgain: '/members',
+                members: members.rows,
+                options: {
+                  idCheckedColumn,
+                  nameCheckedColumn,
+                  positionCheckedColumn
+                },
+                id: projectId,
+                query: req.query,
+                roles: roles.rows,
+                helpers: helpers
+              });
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getPositionColumn = (req, res, next) => {
+  const { idChecked, nameChecked, positionChecked } = req.query;
+  const columnid = idChecked ? 'on' : 'off';
+  const columnname = nameChecked ? 'on' : 'off';
+  const columnposition = positionChecked ? 'on' : 'off';
+  const id = req.params.id;
+
+  const memberoption = new MemberOptions(columnid, columnname, columnposition);
+
+  memberoption
+    .updateQuery()
+    .then(() => {
+      res.redirect(`/projects/members/${id}`);
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getAddMember = (req, res, next) => {
+  const id = req.params.id;
+  const member = new Member(undefined, id);
+  const role = new Role();
+
+  member
+    .findAllMembers()
+    .then(members => {
+      member
+        .findMemberByProject()
+        .then(exceptions => {
+          const listMember = helpers.filterMember(members, exceptions);
+          role
+            .findRole()
+            .then(roles => {
+              res.render('projects/details/add', {
+                title: 'Add Member',
+                path: '/projects',
+                pathAgain: '/members',
+                id: id,
+                members: listMember,
+                roles: roles.rows
+              });
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
+
+exports.postAddMember = (req, res, next) => {
+  const id = req.params.id;
+  const { memberChoosed, roleChoosed } = req.body;
+
+  console.log(id, memberChoosed, roleChoosed);
 };
