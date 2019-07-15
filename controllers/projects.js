@@ -391,5 +391,13 @@ exports.postAddMember = (req, res, next) => {
   const id = req.params.id;
   const { memberChoosed, roleChoosed } = req.body;
 
-  console.log(id, memberChoosed, roleChoosed);
+  const sql = `INSERT INTO public.members(userid, projectid, roleid)
+    VALUES (${Number(memberChoosed)}, ${Number(id)}, ${Number(roleChoosed)})`;
+
+  pool
+    .query(sql)
+    .then(() => {
+      res.redirect(`/projects/members/${id}`);
+    })
+    .catch(err => console.log(err));
 };

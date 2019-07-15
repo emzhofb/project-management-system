@@ -149,6 +149,22 @@
                 <% if (options.positionCheckedColumn == 'on') { %>
                   <td><%= helpers.displayPosition(members[i].roleid) %></td>
                 <% } %>
+                <td>
+                  <a href="/projects/members/edit/<%= id %>/<%= members[i].firstname %>">
+                    <button type="button" class="btn btn-success">
+                      Edit
+                    </button>
+                  </a>
+                  <a
+                    href="/projects/members/delete/<%= id %>/<%= members[i].firstname %>"
+                    style="color: white"
+                    onclick="return confirm('Delete ?')"
+                  >
+                    <button type="button" class="btn btn-danger">
+                      Delete
+                    </button>
+                  </a>
+                </td>
               </tr>
               <% index++ %>
             <% } %>
