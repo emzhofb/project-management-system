@@ -2,7 +2,7 @@ const Project = require('../models/project');
 const Member = require('../models/member');
 const Queries = require('../models/query');
 const Role = require('../models/role');
-const MemberOption = require('../models/memberoption');
+const MemberOptions = require('../models/memberoption');
 const pool = require('../util/database');
 const helpers = require('../helpers/function');
 
@@ -299,7 +299,7 @@ exports.getDetailProject = (req, res, next) => {
 
 exports.getMemberProject = (req, res, next) => {
   const role = new Role();
-  const memberOption = new MemberOption();
+  const memberOption = new MemberOptions();
   const projectId = req.params.id;
 
   role
@@ -335,6 +335,23 @@ exports.getMemberProject = (req, res, next) => {
             .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getPositionColumn = (req, res, next) => {
+  const { idChecked, nameChecked, positionChecked } = req.query;
+  const columnid = idChecked ? 'on' : 'off';
+  const columnname = nameChecked ? 'on' : 'off';
+  const columnposition = positionChecked ? 'on' : 'off';
+  const id = req.params.id;
+
+  const memberoption = new MemberOptions(columnid, columnname, columnposition);
+
+  memberoption
+    .updateQuery()
+    .then(() => {
+      res.redirect(`/projects/members/${id}`);
     })
     .catch(err => console.log(err));
 };

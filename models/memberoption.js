@@ -17,8 +17,8 @@ module.exports = class MemberOptions {
     const sql = `UPDATE public.memberoptions
       SET columnid='${this.columnid}',
       columnname='${this.columnname}',
-      columnmember='${this.columnposition}'
-      WHERE queryid=1`;
+      columnposition='${this.columnposition}'
+      WHERE memberoptionid=1`;
 
     return pool.query(sql);
   }

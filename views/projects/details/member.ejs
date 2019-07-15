@@ -95,7 +95,7 @@
             <a href="/projects/members/<%= id %>" class="btn btn-info">Reset</a>
           </div>
         </form>
-        <form action="/projects/members/column" method="GET">
+        <form action="/projects/members/column/<%= id %>" method="GET">
           <div class="container">
             <h2>Options</h2>
             <div class="row">
@@ -129,7 +129,7 @@
             <th scope="col">ID</th>
             <% } %> <% if (options.nameCheckedColumn == 'on') { %>
             <th scope="col">Name</th>
-            <% } %> <% if (options.positionCheckedColumn == 'off') { %>
+            <% } %> <% if (options.positionCheckedColumn == 'on') { %>
             <th scope="col">Position</th>
             <% } %>
             <th scope="col"></th>
@@ -146,7 +146,7 @@
                 <% if (options.nameCheckedColumn == 'on') { %>
                   <td><%= members[i].firstname + ' ' + members[i].lastname %></td>
                 <% } %>
-                <% if (options.positionCheckedColumn == 'off') { %>
+                <% if (options.positionCheckedColumn == 'on') { %>
                   <td><%= helpers.displayPosition(members[i].roleid) %></td>
                 <% } %>
               </tr>
