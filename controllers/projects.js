@@ -125,7 +125,7 @@ exports.getAddProject = (req, res, next) => {
       res.render('projects/add', {
         title: 'Add Project',
         members: members.rows,
-        path: '/projects/add'
+        path: '/projects'
       });
     })
     .catch(err => console.log(err));
@@ -354,4 +354,42 @@ exports.getPositionColumn = (req, res, next) => {
       res.redirect(`/projects/members/${id}`);
     })
     .catch(err => console.log(err));
+};
+
+exports.getAddMember = (req, res, next) => {
+  const id = req.params.id;
+  const member = new Member(undefined, id);
+  const role = new Role();
+
+  member
+    .findAllMembers()
+    .then(members => {
+      member
+        .findMemberByProject()
+        .then(exceptions => {
+          const listMember = helpers.filterMember(members, exceptions);
+          role
+            .findRole()
+            .then(roles => {
+              res.render('projects/details/add', {
+                title: 'Add Member',
+                path: '/projects',
+                pathAgain: '/members',
+                id: id,
+                members: listMember,
+                roles: roles.rows
+              });
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
+
+exports.postAddMember = (req, res, next) => {
+  const id = req.params.id;
+  const { memberChoosed, roleChoosed } = req.body;
+
+  console.log(id, memberChoosed, roleChoosed);
 };

@@ -14,5 +14,7 @@ router.get('/delete/:id', controller.getDeleteProject);
 router.get('/overview/:id', controller.getDetailProject);
 router.get('/members/:id', controller.getMemberProject);
 router.get('/members/column/:id', controller.getPositionColumn);
+router.get('/members/add/:id', controller.getAddMember);
+router.post('/members/add/:id', controller.postAddMember);
 
 module.exports = router;
