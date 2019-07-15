@@ -18,7 +18,7 @@
       <div class="col-10">
         <h1><%= title %></h1>
         <br />
-        <form action="/projects/members/edit/<%= id %>" method="POST">
+        <form action="/projects/members/edit/<%= id %>/<%= member[0].firstname %>" method="POST">
           <label>Name</label>
           <div class="col-sm-5">
             <input
@@ -47,7 +47,7 @@
           </div>
           <% }) %>
           <br />
-          <button type="submit" class="btn btn-primary">Add</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </form>
       </div>
     </div>
