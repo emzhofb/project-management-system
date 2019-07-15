@@ -14,6 +14,15 @@ module.exports = class Member {
     return pool.query(sql);
   }
 
+  update() {
+    const sql = `UPDATE public.members
+    SET roleid = ${this.roleid}
+    WHERE projectid = ${this.projectid}
+    AND userid = ${this.userid}`;
+
+    return pool.query(sql);
+  }
+
   delete() {
     const sql = `DELETE FROM public.members 
     WHERE projectid = ${this.projectid}`;
@@ -23,6 +32,14 @@ module.exports = class Member {
 
   deleteByUserid() {
     const sql = `DELETE FROM public.members 
+    WHERE userid = ${this.userid}
+    AND projectid = ${this.projectid}`;
+
+    return pool.query(sql);
+  }
+
+  findByUserid() {
+    const sql = `SELECT * FROM public.members 
     WHERE userid = ${this.userid}
     AND projectid = ${this.projectid}`;
 

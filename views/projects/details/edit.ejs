@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../../partials/navigation') %>
+    <div class="row" style="padding: 20px">
+      <div class="col">
+        <%- include('../../partials/sidebar') %>
+      </div>
+      <div class="col-10">
+        <h1><%= title %></h1>
+        <br />
+        <form action="/projects/members/edit/<%= id %>/<%= member[0].firstname %>" method="POST">
+          <label>Name</label>
+          <div class="col-sm-5">
+            <input
+              type="text"
+              readonly
+              class="form-control-plaintext"
+              id="staticEmail"
+              value="<%= member[0].firstname + ' ' + member[0].lastname %>"
+            />
+          </div>
+          <br />
+          <label>Position</label>
+          <% roles.forEach(role => { %>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="radio"
+              name="roleChoosed"
+              id="roleChoosed"
+              value="<%= role.roleid %>"
+              <%= roleid == role.roleid ? 'checked' : '' %>
+            />
+            <label class="form-check-label" for="exampleRadios1">
+              <%= role.rolename %>
+            </label>
+          </div>
+          <% }) %>
+          <br />
+          <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
