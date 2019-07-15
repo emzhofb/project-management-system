@@ -21,6 +21,27 @@
           <hr />
           <h2><b>Library System</b></h2>
         </div>
+        <br />
+        <br />
+        <div class="card">
+          <div class="card-body">
+            <ul>
+              <p>Issue Tracking</p>
+              <li>This will be list</li>
+            </ul>
+          </div>
+        </div>
+        <br />
+        <div class="card">
+          <div class="card-body">
+            <ul>
+              <p>Members</p>
+              <% listMember.forEach(member => { %>
+                <li><%= member.firstname + ' ' + member.lastname %></li>
+              <% }) %>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   </body>

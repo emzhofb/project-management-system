@@ -1,6 +1,8 @@
 const Project = require('../models/project');
 const Member = require('../models/member');
 const Queries = require('../models/query');
+const Role = require('../models/role');
+const MemberOption = require('../models/memberoption');
 const pool = require('../util/database');
 const helpers = require('../helpers/function');
 
@@ -278,11 +280,61 @@ exports.getDeleteProject = (req, res, next) => {
 };
 
 exports.getDetailProject = (req, res, next) => {
-  const id = req.params.id;
-  res.render('projects/details/overview', {
-    title: 'Overview',
-    path: '/projects',
-    pathAgain: '/overview',
-    id: id
-  });
+  const projectId = req.params.id;
+  const member = new Member(undefined, projectId);
+
+  member
+    .findMemberByProject()
+    .then(members => {
+      res.render('projects/details/overview', {
+        title: 'Overview',
+        path: '/projects',
+        pathAgain: '/overview',
+        id: projectId,
+        listMember: members.rows
+      });
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getMemberProject = (req, res, next) => {
+  const role = new Role();
+  const memberOption = new MemberOption();
+  const projectId = req.params.id;
+
+  role
+    .findRole()
+    .then(roles => {
+      memberOption
+        .findQuery()
+        .then(allQueries => {
+          const idCheckedColumn = allQueries.rows[0].columnid;
+          const nameCheckedColumn = allQueries.rows[0].columnname;
+          const positionCheckedColumn = allQueries.rows[0].columnposition;
+
+          const member = new Member(undefined, projectId);
+          member
+            .findMemberByProject()
+            .then(members => {
+              res.render('projects/details/member', {
+                title: 'Members',
+                path: '/projects',
+                pathAgain: '/members',
+                members: members.rows,
+                options: {
+                  idCheckedColumn,
+                  nameCheckedColumn,
+                  positionCheckedColumn
+                },
+                id: projectId,
+                query: req.query,
+                roles: roles.rows,
+                helpers: helpers
+              });
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
 };

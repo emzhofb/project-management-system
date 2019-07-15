@@ -12,5 +12,6 @@ router.get('/edit/:id', controller.getEditProject);
 router.post('/edit/:id', controller.postEditProject);
 router.get('/delete/:id', controller.getDeleteProject);
 router.get('/overview/:id', controller.getDetailProject);
+router.get('/members/:id', controller.getMemberProject);
 
 module.exports = router;

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../../partials/navigation') %>
+    <div class="row" style="padding: 20px">
+      <div class="col">
+        <%- include('../../partials/sidebar') %>
+      </div>
+      <div class="col-10">
+        <h1><%= title %></h1>
+        <h2>Filters</h2>
+        <form action="/" method="GET">
+          <input type="hidden" name="page" value="1" />
+          <div class="container">
+            <div class="row">
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="idChecked" <%= query.idChecked == 'on' ? 'checked' :
+                  ''%> /> ID
+                </div>
+              </div>
+              <div class="col-sm-8">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="id"
+                    name="id"
+                    placeholder="ID"
+                    value="<%= query.id && query.idChecked == 'on' ? query.id : ''%>"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="nameChecked" <%= query.nameChecked == 'on' ? 'checked' :
+                  ''%> /> Name
+                </div>
+              </div>
+              <div class="col-sm-8">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    name="name"
+                    placeholder="Name"
+                    value="<%= query.name && query.nameChecked == 'on' ? query.name : ''%>"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="positionChecked" <%= query.positionChecked == 'on' ?
+                  'checked' : ''%> />Positions
+                </div>
+              </div>
+              <div class="form-group col-md-3">
+                <select
+                  class="form-control"
+                  name="positionFilter"
+                  id="positionFilter"
+                >
+                  <option>Choose positions...</option>
+                  <% roles.forEach(role => { %>
+                    <option 
+                      value="<%= role.rolename %>"
+                      <% if (query.positionFilter == role.rolename) { %>
+                        selected
+                      <% } %>
+                    >
+                      <%= role.rolename %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a href="/projects/members/<%= id %>" class="btn btn-info">Reset</a>
+          </div>
+        </form>
+        <form action="/projects/members/column" method="GET">
+          <div class="container">
+            <h2>Options</h2>
+            <div class="row">
+              <div class="col-sm-2">
+                <p>Columns</p>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="idChecked" 
+                  <%= options.idCheckedColumn == 'on' ? 'checked' : '' %>/> ID
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="nameChecked" 
+                  <%= options.nameCheckedColumn == 'on' ? 'checked' : '' %>/> Name
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="positionChecked" 
+                  <%= options.positionCheckedColumn == 'on' ? 'checked' : '' %>/> Position
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-warning">Apply</button>
+          </div>
+        </form>
+        <br />
+        <table class="table table-striped">
+          <thead>
+            <% if (options.idCheckedColumn == 'on') { %>
+            <th scope="col">ID</th>
+            <% } %> <% if (options.nameCheckedColumn == 'on') { %>
+            <th scope="col">Name</th>
+            <% } %> <% if (options.positionCheckedColumn == 'off') { %>
+            <th scope="col">Position</th>
+            <% } %>
+            <th scope="col"></th>
+          </thead>
+          <tbody>
+            <% let index = 1; %>
+            <% for (let i = 0; i < members.length; i++) { %>
+              <tr>
+                <% if (options.idCheckedColumn == 'on') { %>
+                  <th scope="row">
+                    <%= index %>
+                  </th>
+                <% } %>
+                <% if (options.nameCheckedColumn == 'on') { %>
+                  <td><%= members[i].firstname + ' ' + members[i].lastname %></td>
+                <% } %>
+                <% if (options.positionCheckedColumn == 'off') { %>
+                  <td><%= helpers.displayPosition(members[i].roleid) %></td>
+                <% } %>
+              </tr>
+              <% index++ %>
+            <% } %>
+          </tbody>
+        </table>
+        <a href="add" class="btn btn-secondary">Add</a>
+      </div>
+    </div>
+  </body>
+</html>
