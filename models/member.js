@@ -29,6 +29,14 @@ module.exports = class Member {
     return pool.query(sql);
   }
 
+  findByUserid() {
+    const sql = `SELECT * FROM public.members 
+    WHERE userid = ${this.userid}
+    AND projectid = ${this.projectid}`;
+
+    return pool.query(sql);
+  }
+
   findAllMembers() {
     const sql = `SELECT users.userid, firstname, lastname 
     FROM public.users ORDER BY userid`;

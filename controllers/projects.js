@@ -421,3 +421,35 @@ exports.getDeleteMember = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
+
+exports.getEditMember = (req, res, next) => {
+  const { firstname, id } = req.params;
+  const role = new Role();
+  const user = new User(undefined, undefined, firstname);
+
+  user
+    .findByNameAgain()
+    .then(theuser => {
+      const member = new Member(theuser.rows[0].userid, Number(id));
+      member
+        .findByUserid()
+        .then(themember => {
+          role
+            .findRole()
+            .then(roles => {
+              res.render('projects/details/edit', {
+                title: 'Edit Member',
+                path: '/projects',
+                pathAgain: '/members',
+                id: id,
+                member: theuser.rows,
+                roles: roles.rows,
+                roleid: themember.rows[0].roleid
+              });
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
