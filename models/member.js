@@ -79,4 +79,23 @@ module.exports = class Member {
 
     return pool.query(sql);
   }
+
+  countMemberByProject() {
+    const sql = `SELECT count(*) 
+    FROM public.users, public.members
+    WHERE members.projectid = ${this.projectid}
+    AND members.userid = users.userid`;
+
+    return pool.query(sql);
+  }
+
+  findMemberByProjectAndOffset(perPage, offset) {
+    const sql = `SELECT firstname, lastname, members.roleid 
+    FROM public.users, public.members
+    WHERE members.projectid = ${this.projectid}
+    AND members.userid = users.userid
+    LIMIT ${perPage} OFFSET ${offset}`;
+
+    return pool.query(sql);
+  }
 };
