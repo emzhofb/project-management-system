@@ -302,7 +302,35 @@ exports.getMemberProject = (req, res, next) => {
   const role = new Role();
   const memberOption = new MemberOptions();
   const projectId = req.params.id;
+  const {
+    idChecked,
+    nameChecked,
+    positionChecked,
+    id,
+    name,
+    position
+  } = req.query;
 
+  const filterMember = [];
+  const fieldMember = [];
+
+  if (idChecked && id) {
+    if (Number(id)) {
+      filterMember.push(Number(id));
+      fieldMember.push('memberid');
+    }
+  }
+  if (positionChecked && position) {
+    filterMember.push(Number(position));
+    fieldMember.push('roleid');
+  }
+  if (nameChecked && name) {
+    const firstname = name.split(' ');
+    filterMember.push(firstname[0]);
+    fieldMember.push('userid');
+  }
+
+  console.log(filterMember, fieldMember);
   role
     .findRole()
     .then(roles => {
@@ -315,49 +343,39 @@ exports.getMemberProject = (req, res, next) => {
 
           const member = new Member(undefined, projectId);
           member
-            .findMemberByProject()
-            .then(id => {
-              const index = [];
-              for (let i = 0; i < id.rows.length; i++) {
-                index.push(i+1);
-              }
-              member
-                .countMemberByProject()
-                .then(count => {
-                  const page = Number(req.query.page) || 1;
-                  const perPage = 1;
-                  const total = count.rows[0].count;
-                  const pages = Math.ceil(total / perPage);
-                  const offset = (page - 1) * perPage;
-                  const url =
-                    req.url == `/members/${projectId}`
-                      ? `/projects/members/${projectId}?page=1`
-                      : `/projects${req.url}`;
+            .countMemberByProject()
+            .then(count => {
+              const page = Number(req.query.page) || 1;
+              const perPage = 3;
+              const total = count.rows[0].count;
+              const pages = Math.ceil(total / perPage);
+              const offset = (page - 1) * perPage;
+              const url =
+                req.url == `/members/${projectId}`
+                  ? `/projects/members/${projectId}?page=1`
+                  : `/projects${req.url}`;
 
-                  member
-                    .findMemberByProjectAndOffset(perPage, offset)
-                    .then(members => {
-                      res.render('projects/details/member', {
-                        title: 'Members',
-                        path: '/projects',
-                        pathAgain: '/members',
-                        members: members.rows,
-                        options: {
-                          idCheckedColumn,
-                          nameCheckedColumn,
-                          positionCheckedColumn
-                        },
-                        id: projectId,
-                        query: req.query,
-                        roles: roles.rows,
-                        helpers: helpers,
-                        current: page,
-                        index,
-                        pages,
-                        url
-                      });
-                    })
-                    .catch(err => console.log(err));
+              member
+                .findMemberByProjectAndOffset(perPage, offset)
+                .then(members => {
+                  res.render('projects/details/member', {
+                    title: 'Members',
+                    path: '/projects',
+                    pathAgain: '/members',
+                    members: members.rows,
+                    options: {
+                      idCheckedColumn,
+                      nameCheckedColumn,
+                      positionCheckedColumn
+                    },
+                    id: projectId,
+                    query: req.query,
+                    roles: roles.rows,
+                    helpers: helpers,
+                    current: page,
+                    pages,
+                    url
+                  });
                 })
                 .catch(err => console.log(err));
             })

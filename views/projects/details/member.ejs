@@ -18,7 +18,7 @@
       <div class="col-10">
         <h1><%= title %></h1>
         <h2>Filters</h2>
-        <form action="/" method="GET">
+        <form action="/projects/members/<%= id %>" method="GET">
           <input type="hidden" name="page" value="1" />
           <div class="container">
             <div class="row">
@@ -74,13 +74,13 @@
               <div class="form-group col-md-3">
                 <select
                   class="form-control"
-                  name="positionFilter"
-                  id="positionFilter"
+                  name="position"
+                  id="position"
                 >
                   <option>Choose positions...</option>
                   <% roles.forEach(role => { %>
                     <option 
-                      value="<%= role.rolename %>"
+                      value="<%= role.roleid %>"
                       <% if (query.positionFilter == role.rolename) { %>
                         selected
                       <% } %>
@@ -139,7 +139,7 @@
               <tr>
                 <% if (options.idCheckedColumn == 'on') { %>
                   <th scope="row">
-                    <%= index[i] %>
+                    <%= members[i].memberid %>
                   </th>
                 <% } %>
                 <% if (options.nameCheckedColumn == 'on') { %>
