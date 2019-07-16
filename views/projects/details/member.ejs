@@ -18,7 +18,7 @@
       <div class="col-10">
         <h1><%= title %></h1>
         <h2>Filters</h2>
-        <form action="/" method="GET">
+        <form action="/projects/members/<%= id %>" method="GET">
           <input type="hidden" name="page" value="1" />
           <div class="container">
             <div class="row">
@@ -74,13 +74,13 @@
               <div class="form-group col-md-3">
                 <select
                   class="form-control"
-                  name="positionFilter"
-                  id="positionFilter"
+                  name="position"
+                  id="position"
                 >
                   <option>Choose positions...</option>
                   <% roles.forEach(role => { %>
                     <option 
-                      value="<%= role.rolename %>"
+                      value="<%= role.roleid %>"
                       <% if (query.positionFilter == role.rolename) { %>
                         selected
                       <% } %>
@@ -135,12 +135,11 @@
             <th scope="col"></th>
           </thead>
           <tbody>
-            <% let index = 1; %>
             <% for (let i = 0; i < members.length; i++) { %>
               <tr>
                 <% if (options.idCheckedColumn == 'on') { %>
                   <th scope="row">
-                    <%= index %>
+                    <%= members[i].memberid %>
                   </th>
                 <% } %>
                 <% if (options.nameCheckedColumn == 'on') { %>
@@ -166,10 +165,59 @@
                   </a>
                 </td>
               </tr>
-              <% index++ %>
             <% } %>
           </tbody>
         </table>
+        <nav aria-label="...">
+          <% if (pages > 0) { %>
+            <ul class="pagination">
+              <% if (current == 1) { %>
+                <li class="page-item disabled">
+                  <a class="page-link">First</a>
+                </li>
+              <% } else { %>
+                <li class="page-item">
+                  <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=1`) %>" >First</a>
+                </li>
+              <% } %> 
+              <% let i = (Number(current) > 3 ? Number(current) - 2 : 1) %>
+              <% if (i !== 1) { %>
+                <li class="page-item disabled">
+                  <a>...</a>
+                </li>
+              <% } %> 
+              <% for (; i <= (Number(current) + 2) && i <= pages; i++) { %>
+                <% if (i == current) { %>
+                  <li class="page-item active" aria-current="page">
+                    <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>" name="page"
+                      ><%= i %><span class="sr-only">(current)</span></a
+                    >
+                  </li>
+                <% } else { %>
+                  <li class="page-item" aria-current="page">
+                    <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>" name="page"
+                      ><%= i %><span class="sr-only">(current)</span></a
+                    >
+                  </li>
+                <% } %> 
+              <% } %> 
+              <% if (i == Number(current) + 3 && i < pages) { %>
+                <li class="page-item disabled">
+                  <a>...</a>
+                </li>
+              <% } %> 
+              <% if (current == pages) { %>
+                <li class="page-item disabled">
+                  <a class="page-link">Last</a>
+                </li>
+              <% } else { %>
+                <li class="page-item">
+                  <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${pages}`) %>">Last</a>
+                </li>
+              <% } %>
+            </ul>
+          <% } %>
+        </nav>
         <a href="add/<%= id %>" class="btn btn-secondary">Add</a>
       </div>
     </div>
