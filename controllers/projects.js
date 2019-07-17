@@ -523,13 +523,64 @@ exports.postEditMember = (req, res, next) => {
 
 exports.getIssueProject = (req, res, next) => {
   const projectId = req.params.id;
+  const column = `SELECT issueoptionid, idcolumn, 
+  subjectcolumn, trackercolumn, descriptioncolumn, 
+  statuscolumn, prioritycolumn, assigneecolumn, 
+  startdatecolumn, duedatecolumn, estimatedtime, 
+  donecolumn, authorcolumn
+  FROM public.issueoptions`;
 
-  res.render('projects/details/issue/issue', {
-    title: 'Issues',
-    path: '/projects',
-    pathAgain: '/issues',
-    id: projectId
-  });
+  pool
+    .query(column)
+    .then(columns => {
+      const idcolumn = columns.rows[0].idcolumn;
+      const subjectcolumn = columns.rows[0].subjectcolumn;
+      const trackercolumn = columns.rows[0].trackercolumn;
+      const descriptioncolumn = columns.rows[0].descriptioncolumn;
+      const statuscolumn = columns.rows[0].statuscolumn;
+      const prioritycolumn = columns.rows[0].prioritycolumn;
+      const assigneecolumn = columns.rows[0].assigneecolumn;
+      const startdatecolumn = columns.rows[0].startdatecolumn;
+      const duedatecolumn = columns.rows[0].duedatecolumn;
+      const estimatedtime = columns.rows[0].estimatedtime;
+      const donecolumn = columns.rows[0].donecolumn;
+      const authorcolumn = columns.rows[0].authorcolumn;
+
+      const issue = `SELECT issueid, projectid, tracker, 
+      subject, description, status, priority, assignee, 
+      startdate, duedate, estimatedtime, done, files, 
+      spenttime, targetversion, author, createddate, 
+      updateddate, closeddate, parenttask
+      FROM public.issues`;
+
+      pool
+        .query(issue)
+        .then(issues => {
+          res.render('projects/details/issue/issue', {
+            title: 'Issues',
+            path: '/projects',
+            pathAgain: '/issues',
+            id: projectId,
+            issues: issues.rows,
+            options: {
+              idcolumn,
+              subjectcolumn,
+              trackercolumn,
+              descriptioncolumn,
+              statuscolumn,
+              prioritycolumn,
+              assigneecolumn,
+              startdatecolumn,
+              duedatecolumn,
+              estimatedtime,
+              donecolumn,
+              authorcolumn
+            }
+          });
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getAddIssue = (req, res, next) => {
@@ -546,6 +597,119 @@ exports.getAddIssue = (req, res, next) => {
         id: projectId,
         members: members.rows
       });
+    })
+    .catch(err => console.log(err));
+};
+
+exports.postAddIssue = (req, res, next) => {
+  const projectId = req.params.id;
+  const {
+    tracker,
+    subject,
+    description,
+    status,
+    priority,
+    assigne,
+    startdate,
+    duedate,
+    estimatedtime,
+    done,
+    spenttime,
+    targetversion,
+    author,
+    createddate,
+    updateddate,
+    closeddate
+  } = req.body;
+  let fileUpload = req.files.file;
+
+  fileUpload.mv(`public/images/${fileUpload.name}`, err => {
+    if (err) console.log(err);
+
+    const assigneeSql = `SELECT userid
+    FROM public.members
+    WHERE memberid = ${assigne}`;
+
+    pool
+      .query(assigneeSql)
+      .then(assigneId => {
+        const authorSql = `SELECT userid
+        FROM public.members
+        WHERE memberid = ${author}`;
+
+        pool
+          .query(authorSql)
+          .then(authorId => {
+            const sql = `INSERT INTO public.issues(
+              projectid, tracker, subject, description, status, 
+              priority, assignee, startdate, duedate, estimatedtime, 
+              done, files, spenttime, targetversion, author, 
+              createddate, updateddate, closeddate)
+              VALUES (${projectId}, '${tracker}', '${subject}', 
+              '${description}', '${status}', '${priority}', 
+              ${
+                assigneId.rows[0].userid
+              }, '${startdate}', '${duedate}', ${estimatedtime}, 
+              ${done}, '${fileUpload.name}', ${spenttime}, 
+              '${targetversion}', ${authorId.rows[0].userid}, '${createddate}', 
+              '${updateddate}', '${closeddate}')`;
+
+            pool
+              .query(sql)
+              .then(() => {
+                res.redirect(`/projects/issues/${projectId}`);
+              })
+              .catch(err => console.log(err));
+          })
+
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  });
+};
+
+exports.getIssueColumn = (req, res, next) => {
+  const {
+    idChecked,
+    trackerChecked,
+    subjectChecked,
+    descriptionChecked,
+    statusChecked,
+    priorityChecked,
+    assigneeChecked,
+    startdateChecked,
+    duedateChecked,
+    estimatedChecked,
+    doneChecked,
+    authorChecked
+  } = req.query;
+  const columnid = idChecked ? 'on' : 'off';
+  const columntracker = trackerChecked ? 'on' : 'off';
+  const columnsubject = subjectChecked ? 'on' : 'off';
+  const columndescription = descriptionChecked ? 'on' : 'off';
+  const columnstatus = statusChecked ? 'on' : 'off';
+  const columnpriority = priorityChecked ? 'on' : 'off';
+  const columnassignee = assigneeChecked ? 'on' : 'off';
+  const columnstartdate = startdateChecked ? 'on' : 'off';
+  const columnduedate = duedateChecked ? 'on' : 'off';
+  const columnestimated = estimatedChecked ? 'on' : 'off';
+  const columndone = doneChecked ? 'on' : 'off';
+  const columnauthor = authorChecked ? 'on' : 'off';
+  const id = req.params.id;
+
+  const sql = `UPDATE public.issueoptions
+  SET idcolumn='${columnid}', subjectcolumn='${columnsubject}', 
+  trackercolumn='${columntracker}', descriptioncolumn='${columndescription}', 
+  statuscolumn='${columnstatus}', prioritycolumn='${columnpriority}', 
+  assigneecolumn='${columnassignee}', startdatecolumn='${columnstartdate}', 
+  duedatecolumn='${columnduedate}', estimatedtime='${columnestimated}', 
+  donecolumn='${columndone}', authorcolumn='${columnauthor}'
+	WHERE issueoptionid = 1`;
+
+  pool
+    .query(sql)
+    .then(() => {
+      res.redirect(`/projects/issues/${id}`);
     })
     .catch(err => console.log(err));
 };

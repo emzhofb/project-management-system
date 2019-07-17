@@ -18,7 +18,11 @@
       <div class="col-10">
         <h1>Add <%= title %></h1>
         <br />
-        <form action="/projects/issues/add/<%= id %>" method="POST">
+        <form
+          action="/projects/issues/add/<%= id %>"
+          method="POST"
+          encType="multipart/form-data"
+        >
           <fieldset class="form-group">
             <div class="row">
               <legend class="col-form-label col-sm-2 pt-0">Tracker</legend>
@@ -183,7 +187,7 @@
                     type="radio"
                     name="priority"
                     id="priority"
-                    value="New"
+                    value="Normal"
                   />
                   <label class="form-check-label" for="priority">
                     Normal
@@ -367,20 +371,6 @@
                 id="closeddate"
                 name="closeddate"
                 class="form-control"
-              />
-            </div>
-          </div>
-          <div class="form-group row">
-            <label for="parenttask" class="col-sm-2 col-form-label"
-              >Parent Task</label
-            >
-            <div class="col-sm-5">
-              <input
-                type="text"
-                class="form-control"
-                id="parenttask"
-                name="parenttask"
-                placeholder="0"
               />
             </div>
           </div>
