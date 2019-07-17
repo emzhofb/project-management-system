@@ -613,13 +613,7 @@ exports.postAddIssue = (req, res, next) => {
     startdate,
     duedate,
     estimatedtime,
-    done,
-    spenttime,
-    targetversion,
-    author,
-    createddate,
-    updateddate,
-    closeddate
+    done
   } = req.body;
   let fileUpload = req.files.file;
 
@@ -633,35 +627,22 @@ exports.postAddIssue = (req, res, next) => {
     pool
       .query(assigneeSql)
       .then(assigneId => {
-        const authorSql = `SELECT userid
-        FROM public.members
-        WHERE memberid = ${author}`;
+        const sql = `INSERT INTO public.issues(
+          projectid, tracker, subject, description, status, 
+          priority, assignee, startdate, duedate, estimatedtime, 
+          done, files)
+          VALUES (${projectId}, '${tracker}', '${subject}', 
+          '${description}', '${status}', '${priority}', 
+          ${
+            assigneId.rows[0].userid
+          }, '${startdate}', '${duedate}', ${estimatedtime}, 
+          ${done}, '${fileUpload.name}')`;
 
         pool
-          .query(authorSql)
-          .then(authorId => {
-            const sql = `INSERT INTO public.issues(
-              projectid, tracker, subject, description, status, 
-              priority, assignee, startdate, duedate, estimatedtime, 
-              done, files, spenttime, targetversion, author, 
-              createddate, updateddate, closeddate)
-              VALUES (${projectId}, '${tracker}', '${subject}', 
-              '${description}', '${status}', '${priority}', 
-              ${
-                assigneId.rows[0].userid
-              }, '${startdate}', '${duedate}', ${estimatedtime}, 
-              ${done}, '${fileUpload.name}', ${spenttime}, 
-              '${targetversion}', ${authorId.rows[0].userid}, '${createddate}', 
-              '${updateddate}', '${closeddate}')`;
-
-            pool
-              .query(sql)
-              .then(() => {
-                res.redirect(`/projects/issues/${projectId}`);
-              })
-              .catch(err => console.log(err));
+          .query(sql)
+          .then(() => {
+            res.redirect(`/projects/issues/${projectId}`);
           })
-
           .catch(err => console.log(err));
       })
       .catch(err => console.log(err));
@@ -712,4 +693,109 @@ exports.getIssueColumn = (req, res, next) => {
       res.redirect(`/projects/issues/${id}`);
     })
     .catch(err => console.log(err));
+};
+
+exports.getDeleteIssue = (req, res, next) => {
+  const issueid = req.params.issueid;
+  const id = req.params.id;
+
+  const sql = `DELETE FROM public.issues
+  WHERE issueid = ${issueid}`;
+
+  pool
+    .query(sql)
+    .then(() => res.redirect(`/projects/issues/${id}`))
+    .catch(err => console.log(err));
+};
+
+exports.getEditIssue = (req, res, next) => {
+  const issueid = req.params.issueid;
+  const projectId = req.params.id;
+  const member = new Member(undefined, projectId);
+  const sql = `SELECT * FROM public.issues WHERE issueid = ${issueid}`;
+
+  pool
+    .query(sql)
+    .then(issue => {
+      member
+        .findMemberByProject()
+        .then(members => {
+          res.render('projects/details/issue/edit', {
+            title: 'Issues',
+            path: '/projects',
+            pathAgain: '/issues',
+            id: projectId,
+            members: members.rows,
+            issues: issue.rows[0]
+          });
+        })
+        .catch(err => console.log(err));
+    })
+    .catch(err => console.log(err));
+};
+
+exports.postEditIssue = (req, res, next) => {
+  const projectId = req.params.id;
+  const {
+    tracker,
+    subject,
+    description,
+    status,
+    priority,
+    assigne,
+    startdate,
+    duedate,
+    estimatedtime,
+    done,
+    spenttime,
+    targetversion,
+    author,
+    createddate,
+    updateddate,
+    closeddate,
+    parenttask
+  } = req.body;
+  let fileUpload = req.files.file;
+
+  fileUpload.mv(`public/images/${fileUpload.name}`, err => {
+    if (err) console.log(err);
+
+    const assigneeSql = `SELECT userid
+    FROM public.members
+    WHERE memberid = ${assigne}`;
+
+    pool
+      .query(assigneeSql)
+      .then(assigneId => {
+        const authorSql = `SELECT userid
+        FROM public.members
+        WHERE memberid = ${author}`;
+
+        pool
+          .query(authorSql)
+          .then(authorId => {
+            const sql = `UPDATE public.issues(
+              SET projectid=${projectId}, tracker='${tracker}', 
+              subject='${subject}', description='${description}', status='${status}', 
+              priority='${priority}', assignee=${assigneId.rows[0].userid}, 
+              startdate='${startdate}', duedate='${duedate}', estimatedtime=${estimatedtime}, 
+              done=${done}, files='${fileUpload.name}', spenttime=${spenttime}, 
+              targetversion='${targetversion}', author=${
+              authorId.rows[0].userid
+            }, 
+              createddate='${createddate}', updateddate='${updateddate}', 
+              closeddate='${closeddate}', parenttask=${parenttask})`;
+
+            pool
+              .query(sql)
+              .then(() => {
+                res.redirect(`/projects/issues/${projectId}`);
+              })
+              .catch(err => console.log(err));
+          })
+
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  });
 };
