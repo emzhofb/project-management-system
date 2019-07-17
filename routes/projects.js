@@ -21,5 +21,7 @@ router.get('/members/edit/:id/:firstname', controller.getEditMember);
 router.post('/members/edit/:id/:firstname', controller.postEditMember);
 router.get('/issues/:id', controller.getIssueProject);
 router.get('/issues/add/:id', controller.getAddIssue);
+router.post('/issues/add/:id', controller.postAddIssue);
+router.get('/issues/column/:id', controller.getIssueColumn);
 
 module.exports = router;

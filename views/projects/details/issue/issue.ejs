@@ -19,6 +19,166 @@
         <div class="container">
           <h1><b><%= title %></b></h1>
         </div>
+        <form action="/projects/issues/column/<%= id %>" method="GET">
+          <div class="container">
+            <h2>Options</h2>
+            <div class="row">
+              <div class="col-sm-2">
+                <p>Columns</p>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="idChecked" <%= options.idcolumn == 'on' ? 'checked' : ''
+                  %>/> ID
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="trackerChecked" <%= options.trackercolumn == 'on' ?
+                  'checked' : '' %>/> Tracker
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="subjectChecked" <%= options.subjectcolumn == 'on' ?
+                  'checked' : '' %>/> Subject
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="descriptionChecked" <%= options.descriptioncolumn ==
+                  'on' ? 'checked' : '' %>/> Description
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="statusChecked" <%= options.statuscolumn == 'on' ?
+                  'checked' : '' %>/> Status
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="priorityChecked" <%= options.prioritycolumn == 'on' ?
+                  'checked' : '' %>/> Priority
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="assigneeChecked" <%= options.assigneecolumn == 'on' ?
+                  'checked' : '' %>/> Assignee
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="startdateChecked" <%= options.startdatecolumn == 'on' ?
+                  'checked' : '' %>/> Start Date
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="duedateChecked" <%= options.duedatecolumn == 'on' ?
+                  'checked' : '' %>/> Due Date
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="estimatedChecked" <%= options.estimatedtime == 'on' ?
+                  'checked' : '' %>/> Estimated Time
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="doneChecked" <%= options.donecolumn == 'on' ? 'checked'
+                  : '' %>/> Done
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="authorChecked" <%= options.authorcolumn == 'on' ?
+                  'checked' : '' %>/> Author
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-warning">Apply</button>
+          </div>
+        </form>
+        <br />
+        <table class="table table-striped">
+          <thead>
+            <% if (options.idcolumn == 'on') { %>
+            <th scope="col">ID</th>
+            <% } %> <% if (options.trackercolumn == 'on') { %>
+            <th scope="col">Tracker</th>
+            <% } %> <% if (options.subjectcolumn == 'on') { %>
+            <th scope="col">Subject</th>
+            <% } %> <% if (options.descriptioncolumn == 'on') { %>
+            <th scope="col">Description</th>
+            <% } %> <% if (options.statuscolumn == 'on') { %>
+            <th scope="col">Status</th>
+            <% } %> <% if (options.prioritycolumn == 'on') { %>
+            <th scope="col">Priority</th>
+            <% } %> <% if (options.assigneecolumn == 'on') { %>
+            <th scope="col">Assignee</th>
+            <% } %> <% if (options.startdatecolumn == 'on') { %>
+            <th scope="col">Start Date</th>
+            <% } %> <% if (options.duedatecolumn == 'on') { %>
+            <th scope="col">Due Date</th>
+            <% } %> <% if (options.estimatedtime == 'on') { %>
+            <th scope="col">Estimated Time</th>
+            <% } %> <% if (options.donecolumn == 'on') { %>
+            <th scope="col">Done</th>
+            <% } %> <% if (options.authorcolumn == 'on') { %>
+            <th scope="col">Author</th>
+            <% } %>
+          </thead>
+          <tbody>
+            <% for (let i = 0; i < issues.length; i++) { %>
+            <tr>
+              <% if (options.idcolumn == 'on') { %>
+              <th scope="row">
+                <%= issues[i].issueid %>
+              </th>
+              <% } %> <% if (options.trackercolumn == 'on') { %>
+              <td><%= issues[i].tracker %></td>
+              <% } %> <% if (options.subjectcolumn == 'on') { %>
+              <td><%= issues[i].subject %></td>
+              <% } %> <% if (options.descriptioncolumn == 'on') { %>
+              <td><%= issues[i].description %></td>
+              <% } %> <% if (options.statuscolumn == 'on') { %>
+              <td><%= issues[i].status %></td>
+              <% } %> <% if (options.prioritycolumn == 'on') { %>
+              <td><%= issues[i].priority %></td>
+              <% } %> <% if (options.assigneecolumn == 'on') { %>
+              <td><%= issues[i].assignee %></td>
+              <% } %> <% if (options.startdatecolumn == 'on') { %>
+              <td><%= issues[i].startdate %></td>
+              <% } %> <% if (options.duedatecolumn == 'on') { %>
+              <td><%= issues[i].duedate %></td>
+              <% } %> <% if (options.estimatedtime == 'on') { %>
+              <td><%= issues[i].estimatedtime %></td>
+              <% } %> <% if (options.donecolumn == 'on') { %>
+              <td><%= issues[i].done %></td>
+              <% } %> <% if (options.authorcolumn == 'on') { %>
+              <td><%= issues[i].author %></td>
+              <% } %>
+              <td>
+                <a
+                  href="/projects/issues/edit/<%= id %>/<%= issues[i].issueid %>"
+                >
+                  <button type="button" class="btn btn-success">
+                    Edit
+                  </button>
+                </a>
+                <a
+                  href="/projects/issues/delete/<%= id %>/<%= issues[i].issueid %>"
+                  style="color: white"
+                  onclick="return confirm('Delete ?')"
+                >
+                  <button type="button" class="btn btn-danger">
+                    Delete
+                  </button>
+                </a>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
         <form action="/projects/issues/<%= id %>">
           <a href="add/<%= id %>" class="btn btn-secondary">Add</a>
         </form>
