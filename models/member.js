@@ -72,7 +72,7 @@ module.exports = class Member {
   }
 
   findMemberByProject() {
-    const sql = `SELECT firstname, lastname, members.roleid 
+    const sql = `SELECT firstname, lastname, members.roleid, members.memberid 
     FROM public.users, public.members
     WHERE members.projectid = ${this.projectid}
     AND members.userid = users.userid`;

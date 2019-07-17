@@ -19,5 +19,7 @@ router.post('/members/add/:id', controller.postAddMember);
 router.get('/members/delete/:id/:firstname', controller.getDeleteMember);
 router.get('/members/edit/:id/:firstname', controller.getEditMember);
 router.post('/members/edit/:id/:firstname', controller.postEditMember);
+router.get('/issues/:id', controller.getIssueProject);
+router.get('/issues/add/:id', controller.getAddIssue);
 
 module.exports = router;
