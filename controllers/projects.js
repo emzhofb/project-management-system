@@ -534,11 +534,18 @@ exports.getIssueProject = (req, res, next) => {
 
 exports.getAddIssue = (req, res, next) => {
   const projectId = req.params.id;
+  const member = new Member(undefined, projectId);
 
-  res.render('projects/details/issue/add', {
-    title: 'Issues',
-    path: '/projects',
-    pathAgain: '/issues',
-    id: projectId
-  });
+  member
+    .findMemberByProject()
+    .then(members => {
+      res.render('projects/details/issue/add', {
+        title: 'Issues',
+        path: '/projects',
+        pathAgain: '/issues',
+        id: projectId,
+        members: members.rows
+      });
+    })
+    .catch(err => console.log(err));
 };

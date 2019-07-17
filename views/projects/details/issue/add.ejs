@@ -66,7 +66,7 @@
             <label for="subject" class="col-sm-2 col-form-label">Subject</label>
             <div class="col-sm-5">
               <input
-                type="subject"
+                type="text"
                 class="form-control"
                 id="subject"
                 name="subject"
@@ -232,9 +232,13 @@
             <div class="row">
               <legend class="col-form-label col-sm-2 pt-0">Assignee</legend>
               <div class="col-sm-5">
-                <select class="custom-select">
+                <select class="custom-select" name="assigne" id="assigne">
                   <option selected>Assignee</option>
-                  <option value="1">One</option>
+                  <% members.forEach(member => { %>
+                  <option value="<%= member.memberid %>"
+                    ><%= member.firstname + ' ' + member.lastname %></option
+                  >
+                  <% }) %>
                 </select>
               </div>
             </div>
@@ -258,6 +262,125 @@
                 id="duedate"
                 name="duedate"
                 class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Estimated Time</label>
+            <div class="col-sm-5">
+              <input
+                type="number"
+                id="estimatedtime"
+                name="estimatedtime"
+                class="form-control"
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="done" class="col-sm-2 col-form-label">Done</label>
+            <div class="col-sm-5">
+              <select class="custom-select form-control" name="done" id="done">
+                <option>Percentage</option>
+                <option value="0">0%</option>
+                <option value="25">25%</option>
+                <option value="50">50%</option>
+                <option value="75">75%</option>
+                <option value="100">100%</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">File</label>
+            <div class="col-sm-5">
+              <input type="file" id="file" name="file" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Spent Time</label>
+            <div class="col-sm-5">
+              <input
+                type="number"
+                id="spenttime"
+                name="spenttime"
+                class="form-control"
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="targetversion" class="col-sm-2 col-form-label"
+              >Target Version</label
+            >
+            <div class="col-sm-5">
+              <input
+                type="text"
+                class="form-control"
+                id="targetversion"
+                name="targetversion"
+                placeholder="Target Version"
+              />
+            </div>
+          </div>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-sm-2 pt-0">Author</legend>
+              <div class="col-sm-5">
+                <select class="custom-select" name="author" id="author">
+                  <option selected>Author</option>
+                  <% members.forEach(member => { %>
+                  <option value="<%= member.memberid %>"
+                    ><%= member.firstname + ' ' + member.lastname %></option
+                  >
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Created Date</label>
+            <div class="col-sm-5">
+              <input
+                type="date"
+                id="createddate"
+                name="createddate"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Updated Date</label>
+            <div class="col-sm-5">
+              <input
+                type="date"
+                id="updateddate"
+                name="updateddate"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Closed Date</label>
+            <div class="col-sm-5">
+              <input
+                type="date"
+                id="closeddate"
+                name="closeddate"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="parenttask" class="col-sm-2 col-form-label"
+              >Parent Task</label
+            >
+            <div class="col-sm-5">
+              <input
+                type="text"
+                class="form-control"
+                id="parenttask"
+                name="parenttask"
+                placeholder="0"
               />
             </div>
           </div>
