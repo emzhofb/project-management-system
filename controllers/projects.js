@@ -287,7 +287,7 @@ exports.getDetailProject = (req, res, next) => {
   member
     .findMemberByProject()
     .then(members => {
-      res.render('projects/details/overview', {
+      res.render('projects/details/overview/overview', {
         title: 'Overview',
         path: '/projects',
         pathAgain: '/overview',
@@ -330,7 +330,6 @@ exports.getMemberProject = (req, res, next) => {
     fieldMember.push('userid');
   }
 
-  console.log(filterMember, fieldMember);
   role
     .findRole()
     .then(roles => {
@@ -358,7 +357,7 @@ exports.getMemberProject = (req, res, next) => {
               member
                 .findMemberByProjectAndOffset(perPage, offset)
                 .then(members => {
-                  res.render('projects/details/member', {
+                  res.render('projects/details/member/member', {
                     title: 'Members',
                     path: '/projects',
                     pathAgain: '/members',
@@ -418,7 +417,7 @@ exports.getAddMember = (req, res, next) => {
           role
             .findRole()
             .then(roles => {
-              res.render('projects/details/add', {
+              res.render('projects/details/member/add', {
                 title: 'Add Member',
                 path: '/projects',
                 pathAgain: '/members',
@@ -483,7 +482,7 @@ exports.getEditMember = (req, res, next) => {
           role
             .findRole()
             .then(roles => {
-              res.render('projects/details/edit', {
+              res.render('projects/details/member/edit', {
                 title: 'Edit Member',
                 path: '/projects',
                 pathAgain: '/members',
@@ -520,4 +519,26 @@ exports.postEditMember = (req, res, next) => {
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
+};
+
+exports.getIssueProject = (req, res, next) => {
+  const projectId = req.params.id;
+
+  res.render('projects/details/issue/issue', {
+    title: 'Issues',
+    path: '/projects',
+    pathAgain: '/issues',
+    id: projectId
+  });
+};
+
+exports.getAddIssue = (req, res, next) => {
+  const projectId = req.params.id;
+
+  res.render('projects/details/issue/add', {
+    title: 'Issues',
+    path: '/projects',
+    pathAgain: '/issues',
+    id: projectId
+  });
 };

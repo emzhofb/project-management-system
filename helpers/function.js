@@ -1,5 +1,3 @@
-const pool = require('../util/database');
-
 module.exports = {
   checkMember: function(members, membername) {
     return (
