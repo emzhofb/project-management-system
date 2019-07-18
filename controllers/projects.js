@@ -356,14 +356,7 @@ exports.getMemberProject = (req, res, next) => {
   const role = new Role();
   const memberOption = new MemberOptions();
   const projectId = req.params.id;
-  const {
-    idChecked,
-    nameChecked,
-    positionChecked,
-    id,
-    name,
-    position
-  } = req.query;
+  const { idChecked, positionChecked, id, position } = req.query;
 
   const filterMember = [];
   const fieldMember = [];
@@ -371,17 +364,12 @@ exports.getMemberProject = (req, res, next) => {
   if (idChecked && id) {
     if (Number(id)) {
       filterMember.push(Number(id));
-      fieldMember.push('memberid');
+      fieldMember.push('members.memberid');
     }
   }
   if (positionChecked && position) {
     filterMember.push(Number(position));
-    fieldMember.push('roleid');
-  }
-  if (nameChecked && name) {
-    const firstname = name.split(' ');
-    filterMember.push(firstname[0]);
-    fieldMember.push('userid');
+    fieldMember.push('members.roleid');
   }
 
   role
@@ -394,9 +382,22 @@ exports.getMemberProject = (req, res, next) => {
           const nameCheckedColumn = allQueries.rows[0].columnname;
           const positionCheckedColumn = allQueries.rows[0].columnposition;
 
-          const member = new Member(undefined, projectId);
-          member
-            .countMemberByProject()
+          let countMember = `SELECT count(*) 
+                    FROM public.users, public.members
+                    WHERE members.projectid = ${projectId}
+                    AND members.userid = users.userid`;
+
+          if (fieldMember.length > 0) {
+            countMember += ' AND';
+            for (let i = 0; i < fieldMember.length; i++) {
+              countMember += ` ${fieldMember[i]} = ${filterMember[i]}`;
+
+              if (i !== fieldMember.length - 1) countMember += ' AND';
+            }
+          }
+
+          pool
+            .query(countMember)
             .then(count => {
               const page = Number(req.query.page) || 1;
               const perPage = 3;
@@ -408,8 +409,24 @@ exports.getMemberProject = (req, res, next) => {
                   ? `/projects/members/${projectId}?page=1`
                   : `/projects${req.url}`;
 
-              member
-                .findMemberByProjectAndOffset(perPage, offset)
+              let findMember = `SELECT firstname, lastname, members.roleid, members.memberid 
+                                FROM public.users, public.members
+                                WHERE members.projectid = ${projectId}
+                                AND members.userid = users.userid`;
+
+              if (fieldMember.length > 0) {
+                findMember += ' AND';
+                for (let i = 0; i < fieldMember.length; i++) {
+                  findMember += ` ${fieldMember[i]} = ${filterMember[i]}`;
+
+                  if (i !== fieldMember.length - 1) findMember += ' AND';
+                }
+              }
+
+              findMember += ` LIMIT ${perPage} OFFSET ${offset}`;
+              
+              pool
+                .query(findMember)
                 .then(members => {
                   res.render('projects/details/member/member', {
                     title: 'Members',
@@ -630,7 +647,7 @@ exports.getIssueProject = (req, res, next) => {
       let countIssue = `SELECT count(*) FROM public.issues WHERE projectid = ${projectId}`;
 
       if (filterIssue.length > 0) {
-        countIssue += ` WHERE`;
+        countIssue += ' AND';
         for (let i = 0; i < fieldIssue.length; i++) {
           if (typeof filterIssue[i] !== 'number') {
             countIssue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
@@ -663,6 +680,7 @@ exports.getIssueProject = (req, res, next) => {
         FROM public.issues WHERE projectid = ${projectId}`;
 
           if (filterIssue.length > 0) {
+            issue += ' AND';
             for (let i = 0; i < fieldIssue.length; i++) {
               if (typeof filterIssue[i] !== 'number') {
                 issue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
