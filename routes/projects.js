@@ -23,5 +23,8 @@ router.get('/issues/:id', controller.getIssueProject);
 router.get('/issues/add/:id', controller.getAddIssue);
 router.post('/issues/add/:id', controller.postAddIssue);
 router.get('/issues/column/:id', controller.getIssueColumn);
+router.get('/issues/delete/:id/:issueid', controller.getDeleteIssue);
+router.get('/issues/edit/:id/:issueid', controller.getEditIssue);
+router.post('/issues/edit/:id/:issueid', controller.postEditIssue);
 
 module.exports = router;

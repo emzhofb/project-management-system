@@ -16,10 +16,10 @@
         <%- include('../../../partials/sidebar') %>
       </div>
       <div class="col-10">
-        <h1>Add <%= title %></h1>
+        <h1>Edit <%= title %></h1>
         <br />
         <form
-          action="/projects/issues/add/<%= id %>"
+          action="/projects/issues/edit/<%= id %>/<%= issues.issueid %>"
           method="POST"
           encType="multipart/form-data"
         >
@@ -34,6 +34,7 @@
                     name="tracker"
                     id="tracker"
                     value="Bug"
+                    <%= issues.tracker == 'Bug' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="tracker">
                     Bug
@@ -46,6 +47,7 @@
                     name="tracker"
                     id="tracker"
                     value="Feature"
+                    <%= issues.tracker == 'Feature' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="tracker">
                     Feature
@@ -58,6 +60,7 @@
                     name="tracker"
                     id="tracker"
                     value="Support"
+                    <%= issues.tracker == 'Support' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="tracker">
                     Support
@@ -75,7 +78,8 @@
                 id="subject"
                 name="subject"
                 placeholder="Subject"
-              />
+                value="<%= issues.subject %>"
+                />
             </div>
           </div>
           <div class="form-group row">
@@ -90,7 +94,7 @@
                 id="description"
                 name="description"
                 placeholder="Description"
-              ></textarea>
+                ><%= issues.description ? issues.description : '' %></textarea>
             </div>
           </div>
           <fieldset class="form-group">
@@ -104,6 +108,7 @@
                     name="status"
                     id="status"
                     value="New"
+                    <%= issues.status == 'New' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="status">
                     New
@@ -116,7 +121,7 @@
                     name="status"
                     id="status"
                     value="In Progress"
-                    disabled
+                    <%= issues.status == 'In Progress' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="status">
                     In Progress
@@ -129,7 +134,7 @@
                     name="status"
                     id="status"
                     value="Resolved"
-                    disabled
+                    <%= issues.status == 'Resolved' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="status">
                     Resolved
@@ -142,7 +147,7 @@
                     name="status"
                     id="status"
                     value="Feedback"
-                    disabled
+                    <%= issues.status == 'Feedback' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="status">
                     Feedback
@@ -155,7 +160,7 @@
                     name="status"
                     id="status"
                     value="Closed"
-                    disabled
+                    <%= issues.status == 'Closed' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="status">
                     Closed
@@ -168,7 +173,7 @@
                     name="status"
                     id="status"
                     value="Rejected"
-                    disabled
+                    <%= issues.status == 'Rejected' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="status">
                     Rejected
@@ -188,6 +193,7 @@
                     name="priority"
                     id="priority"
                     value="Normal"
+                    <%= issues.priority == 'Normal' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="priority">
                     Normal
@@ -200,6 +206,7 @@
                     name="priority"
                     id="priority"
                     value="High"
+                    <%= issues.priority == 'High' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="priority">
                     High
@@ -212,6 +219,7 @@
                     name="priority"
                     id="priority"
                     value="Urgent"
+                    <%= issues.priority == 'Urgent' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="priority">
                     Urgent
@@ -224,6 +232,7 @@
                     name="priority"
                     id="priority"
                     value="Immediate"
+                    <%= issues.priority == 'Immediate' ? 'checked' : '' %>
                   />
                   <label class="form-check-label" for="priority">
                     Immediate
@@ -255,6 +264,7 @@
                 id="startdate"
                 name="startdate"
                 class="form-control"
+                value="<%= issues.startdate %>"
               />
             </div>
           </div>
@@ -266,6 +276,7 @@
                 id="duedate"
                 name="duedate"
                 class="form-control"
+                value="<%= issues.duedate %>"
               />
             </div>
           </div>
@@ -278,6 +289,7 @@
                 name="estimatedtime"
                 class="form-control"
                 placeholder="0"
+                value="<%= issues.estimatedtime %>"
               />
             </div>
           </div>
@@ -298,6 +310,91 @@
             <label class="col-sm-2 col-form-label">File</label>
             <div class="col-sm-5">
               <input type="file" id="file" name="file" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Spent Time</label>
+            <div class="col-sm-5">
+              <input
+                type="number"
+                id="spenttime"
+                name="spenttime"
+                class="form-control"
+                placeholder="0"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="targetversion" class="col-sm-2 col-form-label"
+              >Target Version</label
+            >
+            <div class="col-sm-5">
+              <input
+                type="text"
+                class="form-control"
+                id="targetversion"
+                name="targetversion"
+                placeholder="Target Version"
+              />
+            </div>
+          </div>
+          <fieldset class="form-group">
+            <div class="row">
+              <legend class="col-form-label col-sm-2 pt-0">Author</legend>
+              <div class="col-sm-5">
+                <select class="custom-select" name="author" id="author">
+                  <option selected>Author</option>
+                  <% members.forEach(member => { %>
+                  <option value="<%= member.memberid %>"
+                    ><%= member.firstname + ' ' + member.lastname %></option
+                  >
+                  <% }) %>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Created Date</label>
+            <div class="col-sm-5">
+              <input
+                type="date"
+                id="createddate"
+                name="createddate"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Updated Date</label>
+            <div class="col-sm-5">
+              <input
+                type="date"
+                id="updateddate"
+                name="updateddate"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Closed Date</label>
+            <div class="col-sm-5">
+              <input
+                type="date"
+                id="closeddate"
+                name="closeddate"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Parent Task</label>
+            <div class="col-sm-5">
+              <input
+                type="number"
+                id="parenttask"
+                name="parenttask"
+                class="form-control"
+              />
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Save</button>
