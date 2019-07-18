@@ -287,13 +287,67 @@ exports.getDetailProject = (req, res, next) => {
   member
     .findMemberByProject()
     .then(members => {
-      res.render('projects/details/overview/overview', {
-        title: 'Overview',
-        path: '/projects',
-        pathAgain: '/overview',
-        id: projectId,
-        listMember: members.rows
-      });
+      const countBug = `SELECT count(*) FROM public.issues 
+      WHERE tracker = 'Bug'`;
+      pool
+        .query(countBug)
+        .then(totalBug => {
+          const countOpenBug = `SELECT count(*) FROM public.issues 
+          WHERE tracker = 'Bug' AND status != 'Closed'`;
+
+          pool
+            .query(countOpenBug)
+            .then(totalOpenBug => {
+              const countFeature = `SELECT count(*) FROM public.issues 
+              WHERE tracker = 'Feature'`;
+
+              pool
+                .query(countFeature)
+                .then(totalFeature => {
+                  const countOpenFeature = `SELECT count(*) FROM public.issues 
+                  WHERE tracker = 'Feature' AND status != 'Closed'`;
+
+                  pool
+                    .query(countOpenFeature)
+                    .then(totalOpenFeature => {
+                      const countSupport = `SELECT count(*) FROM public.issues 
+                    WHERE tracker = 'Support'`;
+
+                      pool
+                        .query(countSupport)
+                        .then(totalSupport => {
+                          const countOpenSupport = `SELECT count(*) FROM public.issues 
+                        WHERE tracker = 'Support' AND status != 'Closed'`;
+
+                          pool
+                            .query(countOpenSupport)
+                            .then(totalOpenSupport => {
+                              res.render('projects/details/overview/overview', {
+                                title: 'Overview',
+                                path: '/projects',
+                                pathAgain: '/overview',
+                                id: projectId,
+                                listMember: members.rows,
+                                totalBug: totalBug.rows[0].count,
+                                totalOpenBug: totalOpenBug.rows[0].count,
+                                totalFeature: totalFeature.rows[0].count,
+                                totalOpenFeature:
+                                  totalOpenFeature.rows[0].count,
+                                totalSupport: totalSupport.rows[0].count,
+                                totalOpenSupport: totalOpenSupport.rows[0].count
+                              });
+                            })
+                            .catch(err => console.log(err));
+                        })
+                        .catch(err => console.log(err));
+                    })
+                    .catch(err => console.log(err));
+                })
+                .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+        })
+        .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };
