@@ -288,36 +288,36 @@ exports.getDetailProject = (req, res, next) => {
     .findMemberByProject()
     .then(members => {
       const countBug = `SELECT count(*) FROM public.issues 
-      WHERE tracker = 'Bug'`;
+      WHERE projectid = ${projectId} AND tracker = 'Bug'`;
       pool
         .query(countBug)
         .then(totalBug => {
           const countOpenBug = `SELECT count(*) FROM public.issues 
-          WHERE tracker = 'Bug' AND status != 'Closed'`;
+          WHERE projectid = ${projectId} AND tracker = 'Bug' AND status != 'Closed'`;
 
           pool
             .query(countOpenBug)
             .then(totalOpenBug => {
               const countFeature = `SELECT count(*) FROM public.issues 
-              WHERE tracker = 'Feature'`;
+              WHERE projectid = ${projectId} AND tracker = 'Feature'`;
 
               pool
                 .query(countFeature)
                 .then(totalFeature => {
                   const countOpenFeature = `SELECT count(*) FROM public.issues 
-                  WHERE tracker = 'Feature' AND status != 'Closed'`;
+                  WHERE projectid = ${projectId} AND tracker = 'Feature' AND status != 'Closed'`;
 
                   pool
                     .query(countOpenFeature)
                     .then(totalOpenFeature => {
                       const countSupport = `SELECT count(*) FROM public.issues 
-                    WHERE tracker = 'Support'`;
+                    WHERE projectid = ${projectId} AND tracker = 'Support'`;
 
                       pool
                         .query(countSupport)
                         .then(totalSupport => {
                           const countOpenSupport = `SELECT count(*) FROM public.issues 
-                        WHERE tracker = 'Support' AND status != 'Closed'`;
+                        WHERE projectid = ${projectId} AND tracker = 'Support' AND status != 'Closed'`;
 
                           pool
                             .query(countOpenSupport)
@@ -627,7 +627,7 @@ exports.getIssueProject = (req, res, next) => {
       const donecolumn = columns.rows[0].donecolumn;
       const authorcolumn = columns.rows[0].authorcolumn;
 
-      let countIssue = `SELECT count(*) FROM public.issues`;
+      let countIssue = `SELECT count(*) FROM public.issues WHERE projectid = ${projectId}`;
 
       if (filterIssue.length > 0) {
         countIssue += ` WHERE`;
@@ -660,10 +660,9 @@ exports.getIssueProject = (req, res, next) => {
         startdate, duedate, estimatedtime, done, files, 
         spenttime, targetversion, author, createddate, 
         updateddate, closeddate, parenttask
-        FROM public.issues`;
+        FROM public.issues WHERE projectid = ${projectId}`;
 
           if (filterIssue.length > 0) {
-            issue += ` WHERE`;
             for (let i = 0; i < fieldIssue.length; i++) {
               if (typeof filterIssue[i] !== 'number') {
                 issue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
@@ -925,7 +924,6 @@ exports.postEditIssue = (req, res, next) => {
               })
               .catch(err => console.log(err));
           })
-
           .catch(err => console.log(err));
       })
       .catch(err => console.log(err));
