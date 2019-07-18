@@ -523,6 +523,33 @@ exports.postEditMember = (req, res, next) => {
 
 exports.getIssueProject = (req, res, next) => {
   const projectId = req.params.id;
+  const {
+    idFilter,
+    subjectFilter,
+    trackerFilter,
+    id,
+    subject,
+    tracker
+  } = req.query;
+
+  const filterIssue = [];
+  const fieldIssue = [];
+
+  if (idFilter && id) {
+    if (Number(id)) {
+      filterIssue.push(Number(id));
+      fieldIssue.push('issueid');
+    }
+  }
+  if (subjectFilter && subject) {
+    filterIssue.push(subject);
+    fieldIssue.push('subject');
+  }
+  if (trackerFilter && tracker) {
+    filterIssue.push(tracker);
+    fieldIssue.push('tracker');
+  }
+
   const column = `SELECT issueoptionid, idcolumn, 
   subjectcolumn, trackercolumn, descriptioncolumn, 
   statuscolumn, prioritycolumn, assigneecolumn, 
@@ -546,37 +573,86 @@ exports.getIssueProject = (req, res, next) => {
       const donecolumn = columns.rows[0].donecolumn;
       const authorcolumn = columns.rows[0].authorcolumn;
 
-      const issue = `SELECT issueid, projectid, tracker, 
-      subject, description, status, priority, assignee, 
-      startdate, duedate, estimatedtime, done, files, 
-      spenttime, targetversion, author, createddate, 
-      updateddate, closeddate, parenttask
-      FROM public.issues`;
+      let countIssue = `SELECT count(*) FROM public.issues`;
+
+      if (filterIssue.length > 0) {
+        countIssue += ` WHERE`;
+        for (let i = 0; i < fieldIssue.length; i++) {
+          if (typeof filterIssue[i] !== 'number') {
+            countIssue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
+          } else {
+            countIssue += ` ${fieldIssue[i]} = ${filterIssue[i]}`;
+          }
+
+          if (i !== fieldIssue.length - 1) countIssue += ' AND';
+        }
+      }
 
       pool
-        .query(issue)
-        .then(issues => {
-          res.render('projects/details/issue/issue', {
-            title: 'Issues',
-            path: '/projects',
-            pathAgain: '/issues',
-            id: projectId,
-            issues: issues.rows,
-            options: {
-              idcolumn,
-              subjectcolumn,
-              trackercolumn,
-              descriptioncolumn,
-              statuscolumn,
-              prioritycolumn,
-              assigneecolumn,
-              startdatecolumn,
-              duedatecolumn,
-              estimatedtime,
-              donecolumn,
-              authorcolumn
+        .query(countIssue)
+        .then(count => {
+          const page = Number(req.query.page) || 1;
+          const perPage = 3;
+          const total = count.rows[0].count;
+          const pages = Math.ceil(total / perPage);
+          const offset = (page - 1) * perPage;
+          const url =
+            req.url == `/issues/${projectId}`
+              ? `/projects/issues/${projectId}?page=1`
+              : `/projects${req.url}`;
+
+          let issue = `SELECT issueid, projectid, tracker, 
+        subject, description, status, priority, assignee, 
+        startdate, duedate, estimatedtime, done, files, 
+        spenttime, targetversion, author, createddate, 
+        updateddate, closeddate, parenttask
+        FROM public.issues`;
+
+          if (filterIssue.length > 0) {
+            issue += ` WHERE`;
+            for (let i = 0; i < fieldIssue.length; i++) {
+              if (typeof filterIssue[i] !== 'number') {
+                issue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
+              } else {
+                issue += ` ${fieldIssue[i]} = ${filterIssue[i]}`;
+              }
+
+              if (i !== fieldIssue.length - 1) issue += ' AND';
             }
-          });
+          }
+
+          issue += ` LIMIT ${perPage} OFFSET ${offset}`;
+
+          pool
+            .query(issue)
+            .then(issues => {
+              res.render('projects/details/issue/issue', {
+                title: 'Issues',
+                path: '/projects',
+                pathAgain: '/issues',
+                id: projectId,
+                issues: issues.rows,
+                query: req.query,
+                current: page,
+                pages,
+                url,
+                options: {
+                  idcolumn,
+                  subjectcolumn,
+                  trackercolumn,
+                  descriptioncolumn,
+                  statuscolumn,
+                  prioritycolumn,
+                  assigneecolumn,
+                  startdatecolumn,
+                  duedatecolumn,
+                  estimatedtime,
+                  donecolumn,
+                  authorcolumn
+                }
+              });
+            })
+            .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     })
@@ -736,6 +812,7 @@ exports.getEditIssue = (req, res, next) => {
 
 exports.postEditIssue = (req, res, next) => {
   const projectId = req.params.id;
+  const issueid = req.params.issueid;
   const {
     tracker,
     subject,
@@ -774,7 +851,7 @@ exports.postEditIssue = (req, res, next) => {
         pool
           .query(authorSql)
           .then(authorId => {
-            const sql = `UPDATE public.issues(
+            const sql = `UPDATE public.issues
               SET projectid=${projectId}, tracker='${tracker}', 
               subject='${subject}', description='${description}', status='${status}', 
               priority='${priority}', assignee=${assigneId.rows[0].userid}, 
@@ -784,7 +861,8 @@ exports.postEditIssue = (req, res, next) => {
               authorId.rows[0].userid
             }, 
               createddate='${createddate}', updateddate='${updateddate}', 
-              closeddate='${closeddate}', parenttask=${parenttask})`;
+              closeddate='${closeddate}', parenttask=${parenttask}
+              WHERE issueid=${issueid}`;
 
             pool
               .query(sql)
