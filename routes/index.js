@@ -5,6 +5,6 @@ const { checkAuth } = require('../middleware/auth');
 const controller = require('../controllers/index');
 
 /* GET home page. */
-router.get('/', controller.getIndex);
+router.get('/', checkAuth, controller.getIndex);
 
 module.exports = router;

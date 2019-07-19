@@ -25,14 +25,75 @@
                 <%= title %><br />
                 From <%= lastWeek %> to <%= thisDay %>
               </p>
-            </div>
-            <div class="card-body">
-              <% activities.forEach(activity => { %> <%= activity.time[0] %>
-              <ul>
-                <li>
-                  <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
-                </li>
-              </ul>
+              <p>Sunday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Sun') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
+              <% }) %>
+              <p>Monday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Mon') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
+              <% }) %>
+              <p>Tuesday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Tue') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
+              <% }) %>
+              <p>Wednesday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Wed') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
+              <% }) %>
+              <p>Thursday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Thu') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
+              <% }) %>
+              <p>Friday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Fri') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
+              <% }) %>
+              <p>Saturday</p>
+              <% activities.forEach(activity => { %> 
+                <% if (activity.time[0] == 'Sat') { %>
+                  <ul>
+                    <li>
+                      <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                    </li>
+                  </ul>
+                <% } %>
               <% }) %>
             </div>
           </div>

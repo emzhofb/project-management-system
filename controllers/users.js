@@ -30,7 +30,7 @@ exports.postLogin = (req, res, next) => {
           const activity = new Activity(
             thisDay,
             'Login',
-            `${req.session.user.email} has logged in`,
+            `${req.session.user.email} has logged in, author: ${req.session.user.fullname}`,
             req.session.user.userid
           );
 
@@ -78,6 +78,7 @@ exports.postRegister = (req, res, next) => {
 exports.getLogout = (req, res, next) => {
   const userEmail = req.session.user.email;
   const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   req.session.destroy(err => {
     if (err) console.log(err);
 
@@ -85,7 +86,7 @@ exports.getLogout = (req, res, next) => {
     const activity = new Activity(
       thisDay,
       'Logout',
-      `${userEmail} has logged out`,
+      `${userEmail} has logged out, author: ${author}`,
       userId
     );
 
@@ -123,6 +124,8 @@ exports.getProfile = (req, res, next) => {
 
 exports.postProfile = (req, res, next) => {
   const email = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   let { password, roleid, isfulltime } = req.body;
 
   if (password == '') password = undefined;
@@ -133,6 +136,20 @@ exports.postProfile = (req, res, next) => {
 
   user
     .update()
-    .then(() => res.redirect('/projects'))
+    .then(() => {
+      const activity = new Activity(
+        thisDay,
+        'Edit Profile',
+        `${userEmail} has edited his profile, author: ${author}`,
+        userId
+      );
+
+      activity
+      .save()
+      .then(() => {
+        res.redirect('/projects')
+      })
+      .catch(err => console.log(err));
+    })
     .catch(err => console.log(err));
 };

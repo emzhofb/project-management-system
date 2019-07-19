@@ -5,6 +5,7 @@ const Member = require('../models/member');
 const Queries = require('../models/query');
 const Project = require('../models/project');
 const MemberOptions = require('../models/memberoption');
+const Activity = require('../models/activity');
 const pool = require('../util/database');
 const helpers = require('../helpers/function');
 
@@ -134,32 +135,48 @@ exports.getAddProject = (req, res, next) => {
 };
 
 exports.postAddProject = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { projectname, memberid } = req.body;
   const project = new Project(projectname);
 
-  project
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Add Project',
+    `${userEmail} has added project, author: ${author}`,
+    userId
+  );
+
+  activity
     .save()
     .then(() => {
       project
-        .findByName()
-        .then(projects => {
-          const values = [];
-          if (typeof memberid == 'object') {
-            for (let i = 0; i < memberid.length; i++) {
-              values.push(
-                `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
-              );
-            }
-          } else {
-            values.push(
-              `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
-            );
-          }
-          const sql = `INSERT INTO public.members(userid, projectid, roleid)
-                      VALUES ${values.join(',')}`;
-          pool
-            .query(sql)
-            .then(() => res.redirect('/projects'))
+        .save()
+        .then(() => {
+          project
+            .findByName()
+            .then(projects => {
+              const values = [];
+              if (typeof memberid == 'object') {
+                for (let i = 0; i < memberid.length; i++) {
+                  values.push(
+                    `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
+                  );
+                }
+              } else {
+                values.push(
+                  `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
+                );
+              }
+              const sql = `INSERT INTO public.members(userid, projectid, roleid)
+                            VALUES ${values.join(',')}`;
+              pool
+                .query(sql)
+                .then(() => res.redirect('/projects'))
+                .catch(err => console.log(err));
+            })
             .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
@@ -211,36 +228,54 @@ exports.getEditProject = (req, res, next) => {
 };
 
 exports.postEditProject = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { projectname, memberid } = req.body;
   const member = new Member(undefined, Number(req.params.id));
 
-  member
-    .delete()
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Edit Project',
+    `${userEmail} has edited project, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
     .then(() => {
-      const project = new Project(projectname, Number(req.params.id));
-      project
-        .update()
+      member
+        .delete()
         .then(() => {
+          const project = new Project(projectname, Number(req.params.id));
           project
-            .findByName()
-            .then(projects => {
-              const values = [];
-              if (typeof memberid == 'object') {
-                for (let i = 0; i < memberid.length; i++) {
-                  values.push(
-                    `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
-                  );
-                }
-              } else {
-                values.push(
-                  `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
-                );
-              }
-              const sql = `INSERT INTO public.members(userid, projectid, roleid)
-                      VALUES ${values.join(',')}`;
-              pool
-                .query(sql)
-                .then(() => res.redirect('/projects'))
+            .update()
+            .then(() => {
+              project
+                .findByName()
+                .then(projects => {
+                  const values = [];
+                  if (typeof memberid == 'object') {
+                    for (let i = 0; i < memberid.length; i++) {
+                      values.push(
+                        `(${Number(memberid[i])}, ${
+                          projects.rows[0].projectid
+                        }, 2)`
+                      );
+                    }
+                  } else {
+                    values.push(
+                      `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
+                    );
+                  }
+                  const sql = `INSERT INTO public.members(userid, projectid, roleid)
+                          VALUES ${values.join(',')}`;
+                  pool
+                    .query(sql)
+                    .then(() => res.redirect('/projects'))
+                    .catch(err => console.log(err));
+                })
                 .catch(err => console.log(err));
             })
             .catch(err => console.log(err));
@@ -267,15 +302,31 @@ exports.getColumn = (req, res, next) => {
 };
 
 exports.getDeleteProject = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const member = new Member(undefined, Number(req.params.id));
 
-  member
-    .delete()
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Delete',
+    `${userEmail} has deleted project, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
     .then(() => {
-      const project = new Project(undefined, Number(req.params.id));
-      project
+      member
         .delete()
-        .then(() => res.redirect('/projects'))
+        .then(() => {
+          const project = new Project(undefined, Number(req.params.id));
+          project
+            .delete()
+            .then(() => res.redirect('/projects'))
+            .catch(err => console.log(err));
+        })
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
@@ -506,33 +557,66 @@ exports.getAddMember = (req, res, next) => {
 };
 
 exports.postAddMember = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
+
   const id = req.params.id;
   const { memberChoosed, roleChoosed } = req.body;
 
   const sql = `INSERT INTO public.members(userid, projectid, roleid)
     VALUES (${Number(memberChoosed)}, ${Number(id)}, ${Number(roleChoosed)})`;
 
-  pool
-    .query(sql)
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Add Member',
+    `${userEmail} has added member, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
     .then(() => {
-      res.redirect(`/projects/members/${id}`);
+      pool
+        .query(sql)
+        .then(() => {
+          res.redirect(`/projects/members/${id}`);
+        })
+        .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };
 
 exports.getDeleteMember = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { firstname, id } = req.params;
   const user = new User(undefined, undefined, firstname);
 
-  user
-    .findByName()
-    .then(user => {
-      const member = new Member(user.rows[0].userid, Number(id));
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Delete Member',
+    `${userEmail} has deleted member, author: ${author}`,
+    userId
+  );
 
-      member
-        .deleteByUserid()
-        .then(() => {
-          res.redirect(`/projects/members/${id}`);
+  activity
+    .save()
+    .then(() => {
+      user
+        .findByName()
+        .then(user => {
+          const member = new Member(user.rows[0].userid, Number(id));
+
+          member
+            .deleteByUserid()
+            .then(() => {
+              res.redirect(`/projects/members/${id}`);
+            })
+            .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     })
@@ -572,22 +656,38 @@ exports.getEditMember = (req, res, next) => {
 };
 
 exports.postEditMember = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { firstname, id } = req.params;
   const { roleChoosed } = req.body;
   const user = new User(undefined, undefined, firstname);
 
-  user
-    .findByName()
-    .then(userid => {
-      const member = new Member(
-        userid.rows[0].userid,
-        Number(id),
-        Number(roleChoosed)
-      );
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Edit Member',
+    `${userEmail} has edited member, author: ${author}`,
+    userId
+  );
 
-      member
-        .update()
-        .then(() => res.redirect(`/projects/members/${id}`))
+  activity
+    .save()
+    .then(() => {
+      user
+        .findByName()
+        .then(userid => {
+          const member = new Member(
+            userid.rows[0].userid,
+            Number(id),
+            Number(roleChoosed)
+          );
+
+          member
+            .update()
+            .then(() => res.redirect(`/projects/members/${id}`))
+            .catch(err => console.log(err));
+        })
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
@@ -751,6 +851,9 @@ exports.getAddIssue = (req, res, next) => {
 };
 
 exports.postAddIssue = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const projectId = req.params.id;
   const {
     tracker,
@@ -766,36 +869,49 @@ exports.postAddIssue = (req, res, next) => {
   } = req.body;
   let fileUpload = req.files.file;
 
-  fileUpload.mv(`public/images/${fileUpload.name}`, err => {
-    if (err) console.log(err);
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Add Issue',
+    `${userEmail} has added issue, author: ${author}`,
+    userId
+  );
 
-    const assigneeSql = `SELECT userid
-    FROM public.members
-    WHERE memberid = ${assigne}`;
+  activity
+    .save()
+    .then(() => {
+      fileUpload.mv(`public/images/${fileUpload.name}`, err => {
+        if (err) console.log(err);
 
-    pool
-      .query(assigneeSql)
-      .then(assigneId => {
-        const sql = `INSERT INTO public.issues(
-          projectid, tracker, subject, description, status, 
-          priority, assignee, startdate, duedate, estimatedtime, 
-          done, files)
-          VALUES (${projectId}, '${tracker}', '${subject}', 
-          '${description}', '${status}', '${priority}', 
-          ${
-            assigneId.rows[0].userid
-          }, '${startdate}', '${duedate}', ${estimatedtime}, 
-          ${done}, '${fileUpload.name}')`;
+        const assigneeSql = `SELECT userid
+          FROM public.members
+          WHERE memberid = ${assigne}`;
 
         pool
-          .query(sql)
-          .then(() => {
-            res.redirect(`/projects/issues/${projectId}`);
+          .query(assigneeSql)
+          .then(assigneId => {
+            const sql = `INSERT INTO public.issues(
+                projectid, tracker, subject, description, status, 
+                priority, assignee, startdate, duedate, estimatedtime, 
+                done, files)
+                VALUES (${projectId}, '${tracker}', '${subject}', 
+                '${description}', '${status}', '${priority}', 
+                ${
+                  assigneId.rows[0].userid
+                }, '${startdate}', '${duedate}', ${estimatedtime}, 
+                ${done}, '${fileUpload.name}')`;
+
+            pool
+              .query(sql)
+              .then(() => {
+                res.redirect(`/projects/issues/${projectId}`);
+              })
+              .catch(err => console.log(err));
           })
           .catch(err => console.log(err));
-      })
-      .catch(err => console.log(err));
-  });
+      });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getIssueColumn = (req, res, next) => {
@@ -845,15 +961,31 @@ exports.getIssueColumn = (req, res, next) => {
 };
 
 exports.getDeleteIssue = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const issueid = req.params.issueid;
   const id = req.params.id;
 
   const sql = `DELETE FROM public.issues
   WHERE issueid = ${issueid}`;
 
-  pool
-    .query(sql)
-    .then(() => res.redirect(`/projects/issues/${id}`))
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Delete Issue',
+    `${userEmail} has deleted issue, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
+    .then(() => {
+      pool
+        .query(sql)
+        .then(() => res.redirect(`/projects/issues/${id}`))
+        .catch(err => console.log(err));
+    })
     .catch(err => console.log(err));
 };
 
@@ -884,6 +1016,9 @@ exports.getEditIssue = (req, res, next) => {
 };
 
 exports.postEditIssue = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const authorName = req.session.user.fullname;
   const projectId = req.params.id;
   const issueid = req.params.issueid;
   const {
@@ -907,47 +1042,64 @@ exports.postEditIssue = (req, res, next) => {
   } = req.body;
   let fileUpload = req.files.file;
 
-  fileUpload.mv(`public/images/${fileUpload.name}`, err => {
-    if (err) console.log(err);
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Edit Issue',
+    `${userEmail} has edited issue, author: ${authorName}`,
+    userId
+  );
 
-    const assigneeSql = `SELECT userid
-    FROM public.members
-    WHERE memberid = ${assigne}`;
+  activity
+    .save()
+    .then(() => {
+      fileUpload.mv(`public/images/${fileUpload.name}`, err => {
+        if (err) console.log(err);
 
-    pool
-      .query(assigneeSql)
-      .then(assigneId => {
-        const authorSql = `SELECT userid
-        FROM public.members
-        WHERE memberid = ${author}`;
+        const assigneeSql = `SELECT userid
+          FROM public.members
+          WHERE memberid = ${assigne}`;
 
         pool
-          .query(authorSql)
-          .then(authorId => {
-            const sql = `UPDATE public.issues
-              SET projectid=${projectId}, tracker='${tracker}', 
-              subject='${subject}', description='${description}', status='${status}', 
-              priority='${priority}', assignee=${assigneId.rows[0].userid}, 
-              startdate='${startdate}', duedate='${duedate}', estimatedtime=${estimatedtime}, 
-              done=${done}, files='${fileUpload.name}', spenttime=${spenttime}, 
-              targetversion='${targetversion}', author=${
-              authorId.rows[0].userid
-            }, 
-              createddate='${createddate}', updateddate='${updateddate}', 
-              closeddate='${closeddate}', parenttask=${parenttask}
-              WHERE issueid=${issueid}`;
+          .query(assigneeSql)
+          .then(assigneId => {
+            const authorSql = `SELECT userid
+              FROM public.members
+              WHERE memberid = ${author}`;
 
             pool
-              .query(sql)
-              .then(() => {
-                res.redirect(`/projects/issues/${projectId}`);
+              .query(authorSql)
+              .then(authorId => {
+                const sql = `UPDATE public.issues
+                    SET projectid=${projectId}, tracker='${tracker}', 
+                    subject='${subject}', description='${description}', status='${status}', 
+                    priority='${priority}', assignee=${
+                  assigneId.rows[0].userid
+                }, 
+                    startdate='${startdate}', duedate='${duedate}', estimatedtime=${estimatedtime}, 
+                    done=${done}, files='${
+                  fileUpload.name
+                }', spenttime=${spenttime}, 
+                    targetversion='${targetversion}', author=${
+                  authorId.rows[0].userid
+                }, 
+                    createddate='${createddate}', updateddate='${updateddate}', 
+                    closeddate='${closeddate}', parenttask=${parenttask}
+                    WHERE issueid=${issueid}`;
+
+                pool
+                  .query(sql)
+                  .then(() => {
+                    res.redirect(`/projects/issues/${projectId}`);
+                  })
+                  .catch(err => console.log(err));
               })
               .catch(err => console.log(err));
           })
           .catch(err => console.log(err));
-      })
-      .catch(err => console.log(err));
-  });
+      });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getActivity = (req, res, next) => {
@@ -975,7 +1127,8 @@ exports.getActivity = (req, res, next) => {
         activities: activities.rows,
         lastWeek: helpers.displayDate(lastWeek),
         thisDay: helpers.displayDate(thisDay),
-        helpers
+        helpers,
+        moment
       });
     })
     .catch(err => console.log(err));
