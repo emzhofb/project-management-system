@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../../../partials/navigation') %>
+    <div class="row" style="padding: 20px">
+      <div class="col">
+        <%- include('../../../partials/sidebar') %>
+      </div>
+      <div class="col-10">
+        <div class="container">
+          <h1><b><%= title %></b></h1>
+          <hr />
+          <div class="card">
+            <div class="card-body">
+              <p>
+                <%= title %><br />
+                From <%= lastWeek %> to <%= thisDay %>
+              </p>
+            </div>
+            <div class="card-body">
+              <% activities.forEach(activity => { %> <%= activity.time[0] %>
+              <ul>
+                <li>
+                  <%= activity.time[4] + ', ' + activity.title + ', ' + activity.description %>
+                </li>
+              </ul>
+              <% }) %>
+            </div>
+          </div>
+        </div>
+        <br />
+        <br />
+      </div>
+    </div>
+  </body>
+</html>

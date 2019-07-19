@@ -1,6 +1,8 @@
+const moment = require('moment');
 const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const Role = require('../models/role');
+const Activity = require('../models/activity');
 
 exports.getLogin = (req, res, next) => {
   res.render('auth/login', { title: 'Users Login' });
@@ -19,10 +21,25 @@ exports.postLogin = (req, res, next) => {
 
         if (checkPassword) {
           req.session.user = {
-            email: result.rows[0].email
+            email: result.rows[0].email,
+            userid: result.rows[0].userid,
+            fullname: result.rows[0].firstname + ' ' + result.rows[0].lastname
           };
 
-          res.redirect('/');
+          const thisDay = moment().format();
+          const activity = new Activity(
+            thisDay,
+            'Login',
+            `${req.session.user.email} has logged in`,
+            req.session.user.userid
+          );
+
+          activity
+            .save()
+            .then(() => {
+              res.redirect('/');
+            })
+            .catch(err => console.log(err));
         } else res.redirect('/users/login');
       } else res.redirect('/users/login');
     })
@@ -59,10 +76,25 @@ exports.postRegister = (req, res, next) => {
 };
 
 exports.getLogout = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
   req.session.destroy(err => {
     if (err) console.log(err);
 
-    res.redirect('/');
+    const thisDay = moment().format();
+    const activity = new Activity(
+      thisDay,
+      'Logout',
+      `${userEmail} has logged out`,
+      userId
+    );
+
+    activity
+      .save()
+      .then(() => {
+        res.redirect('/');
+      })
+      .catch(err => console.log(err));
   });
 };
 

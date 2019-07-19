@@ -81,7 +81,7 @@
                   <% roles.forEach(role => { %>
                     <option 
                       value="<%= role.roleid %>"
-                      <% if (query.positionFilter == role.rolename) { %>
+                      <% if (query.position == role.roleid) { %>
                         selected
                       <% } %>
                     >

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const { checkAuth } = require('../middleware/auth');
 const controller = require('../controllers/projects');
 
 /* GET home page. */
@@ -26,5 +27,6 @@ router.get('/issues/column/:id', controller.getIssueColumn);
 router.get('/issues/delete/:id/:issueid', controller.getDeleteIssue);
 router.get('/issues/edit/:id/:issueid', controller.getEditIssue);
 router.post('/issues/edit/:id/:issueid', controller.postEditIssue);
+router.get('/activity/:id', controller.getActivity);
 
 module.exports = router;

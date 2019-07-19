@@ -1,3 +1,4 @@
+const moment = require('moment');
 const User = require('../models/user');
 const Role = require('../models/role');
 const Member = require('../models/member');
@@ -424,7 +425,7 @@ exports.getMemberProject = (req, res, next) => {
               }
 
               findMember += ` LIMIT ${perPage} OFFSET ${offset}`;
-              
+
               pool
                 .query(findMember)
                 .then(members => {
@@ -644,7 +645,8 @@ exports.getIssueProject = (req, res, next) => {
       const donecolumn = columns.rows[0].donecolumn;
       const authorcolumn = columns.rows[0].authorcolumn;
 
-      let countIssue = `SELECT count(*) FROM public.issues WHERE projectid = ${projectId}`;
+      let countIssue = `SELECT count(*) FROM public.issues 
+      WHERE projectid = ${projectId}`;
 
       if (filterIssue.length > 0) {
         countIssue += ' AND';
@@ -946,4 +948,35 @@ exports.postEditIssue = (req, res, next) => {
       })
       .catch(err => console.log(err));
   });
+};
+
+exports.getActivity = (req, res, next) => {
+  const projectId = req.params.id;
+  const lastWeek = moment()
+    .subtract(7, 'days')
+    .format();
+  const thisDay = moment().format();
+  const sql = `SELECT * FROM public.activity
+  WHERE time >= timestamp '${lastWeek}'
+  AND time < timestamp '${thisDay}'`;
+
+  pool
+    .query(sql)
+    .then(activities => {
+      for (let i = 0; i < activities.rows.length; i++) {
+        activities.rows[i].time = helpers.changeDate(activities.rows[i].time);
+      }
+
+      res.render('projects/details/activity/activity', {
+        title: 'Activity',
+        path: '/projects',
+        pathAgain: '/activity',
+        id: projectId,
+        activities: activities.rows,
+        lastWeek: helpers.displayDate(lastWeek),
+        thisDay: helpers.displayDate(thisDay),
+        helpers
+      });
+    })
+    .catch(err => console.log(err));
 };
