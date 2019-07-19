@@ -29,5 +29,17 @@ module.exports = {
     }
 
     return listMember;
+  },
+
+  displayDate: function(date) {
+    const newDate = date.toString().split('T');
+    
+    return newDate[0];
+  },
+
+  changeDate: function(date) {
+    const newDate = date.toString().split(' ');
+
+    return newDate;
   }
 };

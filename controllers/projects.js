@@ -1,9 +1,11 @@
+const moment = require('moment');
 const User = require('../models/user');
 const Role = require('../models/role');
 const Member = require('../models/member');
 const Queries = require('../models/query');
 const Project = require('../models/project');
 const MemberOptions = require('../models/memberoption');
+const Activity = require('../models/activity');
 const pool = require('../util/database');
 const helpers = require('../helpers/function');
 
@@ -133,32 +135,48 @@ exports.getAddProject = (req, res, next) => {
 };
 
 exports.postAddProject = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { projectname, memberid } = req.body;
   const project = new Project(projectname);
 
-  project
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Add Project',
+    `${userEmail} has added project, author: ${author}`,
+    userId
+  );
+
+  activity
     .save()
     .then(() => {
       project
-        .findByName()
-        .then(projects => {
-          const values = [];
-          if (typeof memberid == 'object') {
-            for (let i = 0; i < memberid.length; i++) {
-              values.push(
-                `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
-              );
-            }
-          } else {
-            values.push(
-              `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
-            );
-          }
-          const sql = `INSERT INTO public.members(userid, projectid, roleid)
-                      VALUES ${values.join(',')}`;
-          pool
-            .query(sql)
-            .then(() => res.redirect('/projects'))
+        .save()
+        .then(() => {
+          project
+            .findByName()
+            .then(projects => {
+              const values = [];
+              if (typeof memberid == 'object') {
+                for (let i = 0; i < memberid.length; i++) {
+                  values.push(
+                    `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
+                  );
+                }
+              } else {
+                values.push(
+                  `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
+                );
+              }
+              const sql = `INSERT INTO public.members(userid, projectid, roleid)
+                            VALUES ${values.join(',')}`;
+              pool
+                .query(sql)
+                .then(() => res.redirect('/projects'))
+                .catch(err => console.log(err));
+            })
             .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
@@ -210,36 +228,54 @@ exports.getEditProject = (req, res, next) => {
 };
 
 exports.postEditProject = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { projectname, memberid } = req.body;
   const member = new Member(undefined, Number(req.params.id));
 
-  member
-    .delete()
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Edit Project',
+    `${userEmail} has edited project, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
     .then(() => {
-      const project = new Project(projectname, Number(req.params.id));
-      project
-        .update()
+      member
+        .delete()
         .then(() => {
+          const project = new Project(projectname, Number(req.params.id));
           project
-            .findByName()
-            .then(projects => {
-              const values = [];
-              if (typeof memberid == 'object') {
-                for (let i = 0; i < memberid.length; i++) {
-                  values.push(
-                    `(${Number(memberid[i])}, ${projects.rows[0].projectid}, 2)`
-                  );
-                }
-              } else {
-                values.push(
-                  `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
-                );
-              }
-              const sql = `INSERT INTO public.members(userid, projectid, roleid)
-                      VALUES ${values.join(',')}`;
-              pool
-                .query(sql)
-                .then(() => res.redirect('/projects'))
+            .update()
+            .then(() => {
+              project
+                .findByName()
+                .then(projects => {
+                  const values = [];
+                  if (typeof memberid == 'object') {
+                    for (let i = 0; i < memberid.length; i++) {
+                      values.push(
+                        `(${Number(memberid[i])}, ${
+                          projects.rows[0].projectid
+                        }, 2)`
+                      );
+                    }
+                  } else {
+                    values.push(
+                      `(${Number(memberid)}, ${projects.rows[0].projectid}, 2)`
+                    );
+                  }
+                  const sql = `INSERT INTO public.members(userid, projectid, roleid)
+                          VALUES ${values.join(',')}`;
+                  pool
+                    .query(sql)
+                    .then(() => res.redirect('/projects'))
+                    .catch(err => console.log(err));
+                })
                 .catch(err => console.log(err));
             })
             .catch(err => console.log(err));
@@ -266,15 +302,31 @@ exports.getColumn = (req, res, next) => {
 };
 
 exports.getDeleteProject = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const member = new Member(undefined, Number(req.params.id));
 
-  member
-    .delete()
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Delete',
+    `${userEmail} has deleted project, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
     .then(() => {
-      const project = new Project(undefined, Number(req.params.id));
-      project
+      member
         .delete()
-        .then(() => res.redirect('/projects'))
+        .then(() => {
+          const project = new Project(undefined, Number(req.params.id));
+          project
+            .delete()
+            .then(() => res.redirect('/projects'))
+            .catch(err => console.log(err));
+        })
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
@@ -288,36 +340,36 @@ exports.getDetailProject = (req, res, next) => {
     .findMemberByProject()
     .then(members => {
       const countBug = `SELECT count(*) FROM public.issues 
-      WHERE tracker = 'Bug'`;
+      WHERE projectid = ${projectId} AND tracker = 'Bug'`;
       pool
         .query(countBug)
         .then(totalBug => {
           const countOpenBug = `SELECT count(*) FROM public.issues 
-          WHERE tracker = 'Bug' AND status != 'Closed'`;
+          WHERE projectid = ${projectId} AND tracker = 'Bug' AND status != 'Closed'`;
 
           pool
             .query(countOpenBug)
             .then(totalOpenBug => {
               const countFeature = `SELECT count(*) FROM public.issues 
-              WHERE tracker = 'Feature'`;
+              WHERE projectid = ${projectId} AND tracker = 'Feature'`;
 
               pool
                 .query(countFeature)
                 .then(totalFeature => {
                   const countOpenFeature = `SELECT count(*) FROM public.issues 
-                  WHERE tracker = 'Feature' AND status != 'Closed'`;
+                  WHERE projectid = ${projectId} AND tracker = 'Feature' AND status != 'Closed'`;
 
                   pool
                     .query(countOpenFeature)
                     .then(totalOpenFeature => {
                       const countSupport = `SELECT count(*) FROM public.issues 
-                    WHERE tracker = 'Support'`;
+                    WHERE projectid = ${projectId} AND tracker = 'Support'`;
 
                       pool
                         .query(countSupport)
                         .then(totalSupport => {
                           const countOpenSupport = `SELECT count(*) FROM public.issues 
-                        WHERE tracker = 'Support' AND status != 'Closed'`;
+                        WHERE projectid = ${projectId} AND tracker = 'Support' AND status != 'Closed'`;
 
                           pool
                             .query(countOpenSupport)
@@ -356,14 +408,7 @@ exports.getMemberProject = (req, res, next) => {
   const role = new Role();
   const memberOption = new MemberOptions();
   const projectId = req.params.id;
-  const {
-    idChecked,
-    nameChecked,
-    positionChecked,
-    id,
-    name,
-    position
-  } = req.query;
+  const { idChecked, positionChecked, id, position } = req.query;
 
   const filterMember = [];
   const fieldMember = [];
@@ -371,17 +416,12 @@ exports.getMemberProject = (req, res, next) => {
   if (idChecked && id) {
     if (Number(id)) {
       filterMember.push(Number(id));
-      fieldMember.push('memberid');
+      fieldMember.push('members.memberid');
     }
   }
   if (positionChecked && position) {
     filterMember.push(Number(position));
-    fieldMember.push('roleid');
-  }
-  if (nameChecked && name) {
-    const firstname = name.split(' ');
-    filterMember.push(firstname[0]);
-    fieldMember.push('userid');
+    fieldMember.push('members.roleid');
   }
 
   role
@@ -394,9 +434,22 @@ exports.getMemberProject = (req, res, next) => {
           const nameCheckedColumn = allQueries.rows[0].columnname;
           const positionCheckedColumn = allQueries.rows[0].columnposition;
 
-          const member = new Member(undefined, projectId);
-          member
-            .countMemberByProject()
+          let countMember = `SELECT count(*) 
+                    FROM public.users, public.members
+                    WHERE members.projectid = ${projectId}
+                    AND members.userid = users.userid`;
+
+          if (fieldMember.length > 0) {
+            countMember += ' AND';
+            for (let i = 0; i < fieldMember.length; i++) {
+              countMember += ` ${fieldMember[i]} = ${filterMember[i]}`;
+
+              if (i !== fieldMember.length - 1) countMember += ' AND';
+            }
+          }
+
+          pool
+            .query(countMember)
             .then(count => {
               const page = Number(req.query.page) || 1;
               const perPage = 3;
@@ -408,8 +461,24 @@ exports.getMemberProject = (req, res, next) => {
                   ? `/projects/members/${projectId}?page=1`
                   : `/projects${req.url}`;
 
-              member
-                .findMemberByProjectAndOffset(perPage, offset)
+              let findMember = `SELECT firstname, lastname, members.roleid, members.memberid 
+                                FROM public.users, public.members
+                                WHERE members.projectid = ${projectId}
+                                AND members.userid = users.userid`;
+
+              if (fieldMember.length > 0) {
+                findMember += ' AND';
+                for (let i = 0; i < fieldMember.length; i++) {
+                  findMember += ` ${fieldMember[i]} = ${filterMember[i]}`;
+
+                  if (i !== fieldMember.length - 1) findMember += ' AND';
+                }
+              }
+
+              findMember += ` LIMIT ${perPage} OFFSET ${offset}`;
+
+              pool
+                .query(findMember)
                 .then(members => {
                   res.render('projects/details/member/member', {
                     title: 'Members',
@@ -488,33 +557,66 @@ exports.getAddMember = (req, res, next) => {
 };
 
 exports.postAddMember = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
+
   const id = req.params.id;
   const { memberChoosed, roleChoosed } = req.body;
 
   const sql = `INSERT INTO public.members(userid, projectid, roleid)
     VALUES (${Number(memberChoosed)}, ${Number(id)}, ${Number(roleChoosed)})`;
 
-  pool
-    .query(sql)
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Add Member',
+    `${userEmail} has added member, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
     .then(() => {
-      res.redirect(`/projects/members/${id}`);
+      pool
+        .query(sql)
+        .then(() => {
+          res.redirect(`/projects/members/${id}`);
+        })
+        .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };
 
 exports.getDeleteMember = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { firstname, id } = req.params;
   const user = new User(undefined, undefined, firstname);
 
-  user
-    .findByName()
-    .then(user => {
-      const member = new Member(user.rows[0].userid, Number(id));
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Delete Member',
+    `${userEmail} has deleted member, author: ${author}`,
+    userId
+  );
 
-      member
-        .deleteByUserid()
-        .then(() => {
-          res.redirect(`/projects/members/${id}`);
+  activity
+    .save()
+    .then(() => {
+      user
+        .findByName()
+        .then(user => {
+          const member = new Member(user.rows[0].userid, Number(id));
+
+          member
+            .deleteByUserid()
+            .then(() => {
+              res.redirect(`/projects/members/${id}`);
+            })
+            .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     })
@@ -554,22 +656,38 @@ exports.getEditMember = (req, res, next) => {
 };
 
 exports.postEditMember = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const { firstname, id } = req.params;
   const { roleChoosed } = req.body;
   const user = new User(undefined, undefined, firstname);
 
-  user
-    .findByName()
-    .then(userid => {
-      const member = new Member(
-        userid.rows[0].userid,
-        Number(id),
-        Number(roleChoosed)
-      );
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Edit Member',
+    `${userEmail} has edited member, author: ${author}`,
+    userId
+  );
 
-      member
-        .update()
-        .then(() => res.redirect(`/projects/members/${id}`))
+  activity
+    .save()
+    .then(() => {
+      user
+        .findByName()
+        .then(userid => {
+          const member = new Member(
+            userid.rows[0].userid,
+            Number(id),
+            Number(roleChoosed)
+          );
+
+          member
+            .update()
+            .then(() => res.redirect(`/projects/members/${id}`))
+            .catch(err => console.log(err));
+        })
         .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
@@ -627,10 +745,11 @@ exports.getIssueProject = (req, res, next) => {
       const donecolumn = columns.rows[0].donecolumn;
       const authorcolumn = columns.rows[0].authorcolumn;
 
-      let countIssue = `SELECT count(*) FROM public.issues`;
+      let countIssue = `SELECT count(*) FROM public.issues 
+      WHERE projectid = ${projectId}`;
 
       if (filterIssue.length > 0) {
-        countIssue += ` WHERE`;
+        countIssue += ' AND';
         for (let i = 0; i < fieldIssue.length; i++) {
           if (typeof filterIssue[i] !== 'number') {
             countIssue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
@@ -660,10 +779,10 @@ exports.getIssueProject = (req, res, next) => {
         startdate, duedate, estimatedtime, done, files, 
         spenttime, targetversion, author, createddate, 
         updateddate, closeddate, parenttask
-        FROM public.issues`;
+        FROM public.issues WHERE projectid = ${projectId}`;
 
           if (filterIssue.length > 0) {
-            issue += ` WHERE`;
+            issue += ' AND';
             for (let i = 0; i < fieldIssue.length; i++) {
               if (typeof filterIssue[i] !== 'number') {
                 issue += ` ${fieldIssue[i]} = '${filterIssue[i]}'`;
@@ -732,6 +851,9 @@ exports.getAddIssue = (req, res, next) => {
 };
 
 exports.postAddIssue = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const projectId = req.params.id;
   const {
     tracker,
@@ -747,36 +869,49 @@ exports.postAddIssue = (req, res, next) => {
   } = req.body;
   let fileUpload = req.files.file;
 
-  fileUpload.mv(`public/images/${fileUpload.name}`, err => {
-    if (err) console.log(err);
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Add Issue',
+    `${userEmail} has added issue, author: ${author}`,
+    userId
+  );
 
-    const assigneeSql = `SELECT userid
-    FROM public.members
-    WHERE memberid = ${assigne}`;
+  activity
+    .save()
+    .then(() => {
+      fileUpload.mv(`public/images/${fileUpload.name}`, err => {
+        if (err) console.log(err);
 
-    pool
-      .query(assigneeSql)
-      .then(assigneId => {
-        const sql = `INSERT INTO public.issues(
-          projectid, tracker, subject, description, status, 
-          priority, assignee, startdate, duedate, estimatedtime, 
-          done, files)
-          VALUES (${projectId}, '${tracker}', '${subject}', 
-          '${description}', '${status}', '${priority}', 
-          ${
-            assigneId.rows[0].userid
-          }, '${startdate}', '${duedate}', ${estimatedtime}, 
-          ${done}, '${fileUpload.name}')`;
+        const assigneeSql = `SELECT userid
+          FROM public.members
+          WHERE memberid = ${assigne}`;
 
         pool
-          .query(sql)
-          .then(() => {
-            res.redirect(`/projects/issues/${projectId}`);
+          .query(assigneeSql)
+          .then(assigneId => {
+            const sql = `INSERT INTO public.issues(
+                projectid, tracker, subject, description, status, 
+                priority, assignee, startdate, duedate, estimatedtime, 
+                done, files)
+                VALUES (${projectId}, '${tracker}', '${subject}', 
+                '${description}', '${status}', '${priority}', 
+                ${
+                  assigneId.rows[0].userid
+                }, '${startdate}', '${duedate}', ${estimatedtime}, 
+                ${done}, '${fileUpload.name}')`;
+
+            pool
+              .query(sql)
+              .then(() => {
+                res.redirect(`/projects/issues/${projectId}`);
+              })
+              .catch(err => console.log(err));
           })
           .catch(err => console.log(err));
-      })
-      .catch(err => console.log(err));
-  });
+      });
+    })
+    .catch(err => console.log(err));
 };
 
 exports.getIssueColumn = (req, res, next) => {
@@ -826,15 +961,31 @@ exports.getIssueColumn = (req, res, next) => {
 };
 
 exports.getDeleteIssue = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const author = req.session.user.fullname;
   const issueid = req.params.issueid;
   const id = req.params.id;
 
   const sql = `DELETE FROM public.issues
   WHERE issueid = ${issueid}`;
 
-  pool
-    .query(sql)
-    .then(() => res.redirect(`/projects/issues/${id}`))
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Delete Issue',
+    `${userEmail} has deleted issue, author: ${author}`,
+    userId
+  );
+
+  activity
+    .save()
+    .then(() => {
+      pool
+        .query(sql)
+        .then(() => res.redirect(`/projects/issues/${id}`))
+        .catch(err => console.log(err));
+    })
     .catch(err => console.log(err));
 };
 
@@ -865,6 +1016,9 @@ exports.getEditIssue = (req, res, next) => {
 };
 
 exports.postEditIssue = (req, res, next) => {
+  const userEmail = req.session.user.email;
+  const userId = req.session.user.userid;
+  const authorName = req.session.user.fullname;
   const projectId = req.params.id;
   const issueid = req.params.issueid;
   const {
@@ -888,46 +1042,94 @@ exports.postEditIssue = (req, res, next) => {
   } = req.body;
   let fileUpload = req.files.file;
 
-  fileUpload.mv(`public/images/${fileUpload.name}`, err => {
-    if (err) console.log(err);
+  const thisDay = moment().format();
+  const activity = new Activity(
+    thisDay,
+    'Edit Issue',
+    `${userEmail} has edited issue, author: ${authorName}`,
+    userId
+  );
 
-    const assigneeSql = `SELECT userid
-    FROM public.members
-    WHERE memberid = ${assigne}`;
+  activity
+    .save()
+    .then(() => {
+      fileUpload.mv(`public/images/${fileUpload.name}`, err => {
+        if (err) console.log(err);
 
-    pool
-      .query(assigneeSql)
-      .then(assigneId => {
-        const authorSql = `SELECT userid
-        FROM public.members
-        WHERE memberid = ${author}`;
+        const assigneeSql = `SELECT userid
+          FROM public.members
+          WHERE memberid = ${assigne}`;
 
         pool
-          .query(authorSql)
-          .then(authorId => {
-            const sql = `UPDATE public.issues
-              SET projectid=${projectId}, tracker='${tracker}', 
-              subject='${subject}', description='${description}', status='${status}', 
-              priority='${priority}', assignee=${assigneId.rows[0].userid}, 
-              startdate='${startdate}', duedate='${duedate}', estimatedtime=${estimatedtime}, 
-              done=${done}, files='${fileUpload.name}', spenttime=${spenttime}, 
-              targetversion='${targetversion}', author=${
-              authorId.rows[0].userid
-            }, 
-              createddate='${createddate}', updateddate='${updateddate}', 
-              closeddate='${closeddate}', parenttask=${parenttask}
-              WHERE issueid=${issueid}`;
+          .query(assigneeSql)
+          .then(assigneId => {
+            const authorSql = `SELECT userid
+              FROM public.members
+              WHERE memberid = ${author}`;
 
             pool
-              .query(sql)
-              .then(() => {
-                res.redirect(`/projects/issues/${projectId}`);
+              .query(authorSql)
+              .then(authorId => {
+                const sql = `UPDATE public.issues
+                    SET projectid=${projectId}, tracker='${tracker}', 
+                    subject='${subject}', description='${description}', status='${status}', 
+                    priority='${priority}', assignee=${
+                  assigneId.rows[0].userid
+                }, 
+                    startdate='${startdate}', duedate='${duedate}', estimatedtime=${estimatedtime}, 
+                    done=${done}, files='${
+                  fileUpload.name
+                }', spenttime=${spenttime}, 
+                    targetversion='${targetversion}', author=${
+                  authorId.rows[0].userid
+                }, 
+                    createddate='${createddate}', updateddate='${updateddate}', 
+                    closeddate='${closeddate}', parenttask=${parenttask}
+                    WHERE issueid=${issueid}`;
+
+                pool
+                  .query(sql)
+                  .then(() => {
+                    res.redirect(`/projects/issues/${projectId}`);
+                  })
+                  .catch(err => console.log(err));
               })
               .catch(err => console.log(err));
           })
-
           .catch(err => console.log(err));
-      })
-      .catch(err => console.log(err));
-  });
+      });
+    })
+    .catch(err => console.log(err));
+};
+
+exports.getActivity = (req, res, next) => {
+  const projectId = req.params.id;
+  const lastWeek = moment()
+    .subtract(7, 'days')
+    .format();
+  const thisDay = moment().format();
+  const sql = `SELECT * FROM public.activity
+  WHERE time >= timestamp '${lastWeek}'
+  AND time < timestamp '${thisDay}'`;
+
+  pool
+    .query(sql)
+    .then(activities => {
+      for (let i = 0; i < activities.rows.length; i++) {
+        activities.rows[i].time = helpers.changeDate(activities.rows[i].time);
+      }
+
+      res.render('projects/details/activity/activity', {
+        title: 'Activity',
+        path: '/projects',
+        pathAgain: '/activity',
+        id: projectId,
+        activities: activities.rows,
+        lastWeek: helpers.displayDate(lastWeek),
+        thisDay: helpers.displayDate(thisDay),
+        helpers,
+        moment
+      });
+    })
+    .catch(err => console.log(err));
 };
