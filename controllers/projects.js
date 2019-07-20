@@ -415,20 +415,31 @@ exports.getMemberProject = (req, res, next) => {
   const role = new Role();
   const memberOption = new MemberOptions();
   const projectId = req.params.id;
-  const { idChecked, positionChecked, id, position } = req.query;
+  const {
+    idChecked,
+    nameChecked,
+    positionChecked,
+    id,
+    name,
+    position
+  } = req.query;
 
   const filterMember = [];
-  const fieldMember = [];
+  let filter = false;
 
   if (idChecked && id) {
     if (Number(id)) {
-      filterMember.push(Number(id));
-      fieldMember.push('members.memberid');
+      filter = true;
+      filterMember.push(`members.memberid = ${Number(id)}`);
     }
   }
+  if (nameChecked && name) {
+    filter = true;
+    filterMember.push(`users.firstname ILIKE '%${name}%' `);
+  }
   if (positionChecked && position) {
-    filterMember.push(Number(position));
-    fieldMember.push('members.roleid');
+    filter = true;
+    filterMember.push(`members.roleid = ${Number(position)}`);
   }
 
   role
@@ -446,13 +457,8 @@ exports.getMemberProject = (req, res, next) => {
                     WHERE members.projectid = ${projectId}
                     AND members.userid = users.userid`;
 
-          if (fieldMember.length > 0) {
-            countMember += ' AND';
-            for (let i = 0; i < fieldMember.length; i++) {
-              countMember += ` ${fieldMember[i]} = ${filterMember[i]}`;
-
-              if (i !== fieldMember.length - 1) countMember += ' AND';
-            }
+          if (filter) {
+            countMember += ` AND ${filterMember.join(' AND ')}`;
           }
 
           pool
@@ -468,18 +474,13 @@ exports.getMemberProject = (req, res, next) => {
                   ? `/projects/members/${projectId}?page=1`
                   : `/projects${req.url}`;
 
-              let findMember = `SELECT firstname, lastname, members.roleid, members.memberid 
+              let findMember = `SELECT * 
                                 FROM public.users, public.members
                                 WHERE members.projectid = ${projectId}
                                 AND members.userid = users.userid`;
 
-              if (fieldMember.length > 0) {
-                findMember += ' AND';
-                for (let i = 0; i < fieldMember.length; i++) {
-                  findMember += ` ${fieldMember[i]} = ${filterMember[i]}`;
-
-                  if (i !== fieldMember.length - 1) findMember += ' AND';
-                }
+              if (filter) {
+                findMember += ` AND ${filterMember.join(' AND ')}`;
               }
 
               findMember += ` LIMIT ${perPage} OFFSET ${offset}`;
