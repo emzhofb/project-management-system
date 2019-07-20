@@ -248,7 +248,9 @@
                 <select class="custom-select" name="assigne" id="assigne">
                   <option selected>Assignee</option>
                   <% members.forEach(member => { %>
-                  <option value="<%= member.memberid %>"
+                  <option 
+                    value="<%= member.memberid %>"
+                    <%= member.userid == issues.assignee ? 'selected' : '' %>
                     ><%= member.firstname + ' ' + member.lastname %></option
                   >
                   <% }) %>
@@ -264,7 +266,7 @@
                 id="startdate"
                 name="startdate"
                 class="form-control"
-                value="<%= issues.startdate %>"
+                value="<%= moment(issues.startdate).format('YYYY-MM-DD') %>"
               />
             </div>
           </div>
@@ -276,7 +278,7 @@
                 id="duedate"
                 name="duedate"
                 class="form-control"
-                value="<%= issues.duedate %>"
+                value="<%= moment(issues.duedate).format('YYYY-MM-DD') %>"
               />
             </div>
           </div>
@@ -298,18 +300,18 @@
             <div class="col-sm-5">
               <select class="custom-select form-control" name="done" id="done">
                 <option>Percentage</option>
-                <option value="0">0%</option>
-                <option value="25">25%</option>
-                <option value="50">50%</option>
-                <option value="75">75%</option>
-                <option value="100">100%</option>
+                <option value="0" <%= issues.done == 0 ? 'selected' : '' %>>0%</option>
+                <option value="25" <%= issues.done == 25 ? 'selected' : '' %>>25%</option>
+                <option value="50" <%= issues.done == 50 ? 'selected' : '' %>>50%</option>
+                <option value="75" <%= issues.done == 75 ? 'selected' : '' %>>75%</option>
+                <option value="100" <%= issues.done == 100 ? 'selected' : '' %>>100%</option>
               </select>
             </div>
           </div>
           <div class="form-group row">
             <label class="col-sm-2 col-form-label">File</label>
             <div class="col-sm-5">
-              <input type="file" id="file" name="file" class="form-control" />
+              <input type="file" id="file" name="file" class="form-control" value="<%= issues.files %>" />
             </div>
           </div>
           <div class="form-group row">
@@ -320,7 +322,7 @@
                 id="spenttime"
                 name="spenttime"
                 class="form-control"
-                placeholder="0"
+                value="<%= issues.spenttime %>"
               />
             </div>
           </div>
@@ -334,7 +336,7 @@
                 class="form-control"
                 id="targetversion"
                 name="targetversion"
-                placeholder="Target Version"
+                value="<%= issues.targetversion %>"
               />
             </div>
           </div>
@@ -342,14 +344,14 @@
             <div class="row">
               <legend class="col-form-label col-sm-2 pt-0">Author</legend>
               <div class="col-sm-5">
-                <select class="custom-select" name="author" id="author">
-                  <option selected>Author</option>
-                  <% members.forEach(member => { %>
-                  <option value="<%= member.memberid %>"
-                    ><%= member.firstname + ' ' + member.lastname %></option
-                  >
-                  <% }) %>
-                </select>
+                <input 
+                  type="text" 
+                  name="author" 
+                  class="form-control-plaintext"
+                  id="author" 
+                  value="<%= issues.firstname + ' ' + issues.lastname %>" 
+                  readonly
+                >
               </div>
             </div>
           </fieldset>
@@ -361,6 +363,7 @@
                 id="createddate"
                 name="createddate"
                 class="form-control"
+                value="<%= moment(issues.createddate).format('YYYY-MM-DD') %>"
               />
             </div>
           </div>
@@ -372,6 +375,7 @@
                 id="updateddate"
                 name="updateddate"
                 class="form-control"
+                value="<%= moment(issues.updateddate).format('YYYY-MM-DD') %>"
               />
             </div>
           </div>
@@ -383,6 +387,7 @@
                 id="closeddate"
                 name="closeddate"
                 class="form-control"
+                value="<%= moment(issues.closeddate).format('YYYY-MM-DD') %>"
               />
             </div>
           </div>
@@ -394,6 +399,7 @@
                 id="parenttask"
                 name="parenttask"
                 class="form-control"
+                value="<%= issues.parenttask %>"
               />
             </div>
           </div>
