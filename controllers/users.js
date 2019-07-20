@@ -30,7 +30,9 @@ exports.postLogin = (req, res, next) => {
           const activity = new Activity(
             thisDay,
             'Login',
-            `${req.session.user.email} has logged in, author: ${req.session.user.fullname}`,
+            `${req.session.user.email} has logged in, author: ${
+              req.session.user.fullname
+            }`,
             req.session.user.userid
           );
 
@@ -137,19 +139,20 @@ exports.postProfile = (req, res, next) => {
   user
     .update()
     .then(() => {
+      const thisDay = moment().format();
       const activity = new Activity(
         thisDay,
         'Edit Profile',
-        `${userEmail} has edited his profile, author: ${author}`,
+        `${email} has edited his profile, author: ${author}`,
         userId
       );
 
       activity
-      .save()
-      .then(() => {
-        res.redirect('/projects')
-      })
-      .catch(err => console.log(err));
+        .save()
+        .then(() => {
+          res.redirect('/projects');
+        })
+        .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };

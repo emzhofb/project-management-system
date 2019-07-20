@@ -21,16 +21,16 @@ exports.getProjects = (req, res, next) => {
     memberFilter
   } = req.query;
   const filterProject = [];
-  const fieldProject = [];
+  let filter = false;
 
   if (idChecked && id)
     if (Number(id)) {
-      filterProject.push(Number(id));
-      fieldProject.push('projectid');
+      filter = true;
+      filterProject.push(`projects.projectid = ${Number(id)}`);
     }
   if (nameChecked && name) {
-    filterProject.push(name);
-    fieldProject.push('projectname');
+    filter = true;
+    filterProject.push(`projects.projectname ILIKE '%${name}%'`);
   }
 
   queries
@@ -39,47 +39,53 @@ exports.getProjects = (req, res, next) => {
       const idCheckedColumn = allQueries.rows[0].columnid;
       const nameCheckedColumn = allQueries.rows[0].columnname;
       const memberCheckedColumn = allQueries.rows[0].columnmember;
+
       member
         .findAllMembers()
         .then(members => {
-          let sql = `SELECT count(*) FROM public.projects`;
-          if (filterProject.length > 0) {
-            sql += ` WHERE`;
-            for (let i = 0; i < fieldProject.length; i++) {
-              sql += ` ${fieldProject[i]} = '${filterProject[i]}'`;
-              if (i !== fieldProject.length - 1) sql += ` AND`;
-            }
+          let sql = `SELECT COUNT(id) as total 
+          FROM (SELECT DISTINCT projects.projectid AS id 
+            FROM projects 
+            LEFT JOIN members 
+            ON projects.projectid = members.projectid 
+            LEFT JOIN users 
+            ON members.userid = users.userid`;
+          if (filter) {
+            sql += ` WHERE ${filterProject.join(' AND ')}`;
           }
+          sql += `) AS projectmember`;
+
           const page = Number(req.query.page) || 1;
           const perPage = 3;
 
           pool
             .query(sql)
             .then(count => {
-              const total = count.rows[0].count;
+              const total = count.rows[0].total;
               const pages = Math.ceil(total / perPage);
               const offset = (page - 1) * perPage;
               const url =
                 req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
 
-              sql = `SELECT * FROM public.projects`;
-              if (filterProject.length > 0) {
-                sql += ` WHERE`;
-                for (let i = 0; i < fieldProject.length; i++) {
-                  sql += ` ${fieldProject[i]} = '${filterProject[i]}'`;
-                  if (i !== fieldProject.length - 1) sql += ` AND`;
-                }
+              sql = `SELECT DISTINCT 
+              projects.projectid, projects.projectname 
+              FROM projects 
+              LEFT JOIN members 
+              ON projects.projectid = members.projectid 
+              LEFT JOIN users 
+              ON members.userid = users.userid`;
+              if (filter) {
+                sql += ` WHERE ${filterProject.join(' AND ')}`;
               }
-              sql += ` ORDER BY projectid`;
-              sql += ` LIMIT ${perPage} OFFSET ${offset}`;
+              sql += ` ORDER BY projects.projectid LIMIT ${perPage} OFFSET ${offset}`;
 
               pool
                 .query(sql)
                 .then(projects => {
                   let sqlMember = `SELECT firstname, lastname, projectname 
-                                FROM public.users, public.members, public.projects
-                                WHERE projects.projectid = members.projectid
-                                AND members.userid = users.userid`;
+            FROM public.users, public.members, public.projects
+            WHERE projects.projectid = members.projectid
+            AND members.userid = users.userid`;
                   const filterMember = [];
 
                   if (memberChecked && memberFilter) {
@@ -88,6 +94,7 @@ exports.getProjects = (req, res, next) => {
                   if (filterMember.length > 0) {
                     sqlMember += ` AND users.firstname = ${filterMember[0]}`;
                   }
+
                   pool
                     .query(sqlMember)
                     .then(result => {
@@ -212,8 +219,8 @@ exports.getEditProject = (req, res, next) => {
               }
 
               res.render('projects/edit', {
-                title: 'Edit Product',
-                path: `/projects/edit/${req.params.id}`,
+                title: 'Edit Project',
+                path: `/projects`,
                 members: members.rows,
                 projectname: project.rows[0].projectname,
                 membername: name,
