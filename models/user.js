@@ -25,8 +25,18 @@ module.exports = class User {
     return pool.query(sql);
   }
 
+  findAll() {
+    const sql = `SELECT * FROM public.users ORDER BY userid`;
+    return pool.query(sql);
+  }
+
   find() {
     const sql = `SELECT * FROM public.users WHERE email = '${this.email}'`;
+    return pool.query(sql);
+  }
+
+  findById(userid) {
+    const sql = `SELECT * FROM public.users WHERE userid = ${userid}`;
     return pool.query(sql);
   }
 

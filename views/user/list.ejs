@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../partials/navigation') %>
+    <div class="container" style="padding: 20px">
+      <h1><%= title %></h1>
+      <div class="container">
+        <div class="row">
+          <br />
+          <table class="table table-striped">
+            <thead>
+              <th scope="col">ID</th>
+              <th scope="col">Email</th>
+              <th scope="col">Name</th>
+              <th scope="col">Type</th>
+              <th scope="col">Role</th>
+              <th scope="col"></th>
+            </thead>
+            <tbody>
+              <% users.forEach(user => { %>
+              <tr>
+                <th scope="row">
+                  <%= user.userid %>
+                </th>
+                <td>
+                  <%= user.email %>
+                </td>
+                <td>
+                  <%= user.firstname + ' ' + user.lastname %>
+                </td>
+                <td>
+                  <% if (user.isfulltime == true) { %> Fulltime <% } else { %>
+                  Parttime <% } %>
+                </td>
+                <td>
+                  <%= helpers.displayPosition(user.roleid) %>
+                </td>
+                <td>
+                  <a href="/users/edit/<%= user.userid %>">
+                    <button type="button" class="btn btn-success">
+                      Edit
+                    </button>
+                  </a>
+                  <a
+                    href="/users/delete/<%= user.userid %>"
+                    style="color: white"
+                    onclick="return confirm('Delete ?')"
+                  >
+                    <button type="button" class="btn btn-danger">
+                      Delete
+                    </button>
+                  </a>
+                </td>
+              </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <a href="/users/register" class="btn btn-secondary">Add</a>
+    </div>
+  </body>
+</html>
