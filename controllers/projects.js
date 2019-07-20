@@ -987,14 +987,22 @@ exports.getDeleteIssue = (req, res, next) => {
 exports.getEditIssue = (req, res, next) => {
   const issueid = req.params.issueid;
   const projectId = req.params.id;
-  const member = new Member(undefined, projectId);
-  const sql = `SELECT * FROM public.issues WHERE issueid = ${issueid}`;
+  const sql = `SELECT * FROM public.issues, public.users 
+  WHERE issueid = ${issueid}
+  AND users.userid = author
+  AND issues.projectid = ${projectId}`;
 
   pool
     .query(sql)
     .then(issue => {
-      member
-        .findMemberByProject()
+      const memberSql = `SELECT *
+      FROM public.members, public.users, public.projects
+      WHERE users.userid = members.userid
+      AND projects.projectid = members.projectid
+      AND members.projectid = ${projectId}`;
+
+      pool
+        .query(memberSql)
         .then(members => {
           res.render('projects/details/issue/edit', {
             title: 'Issues',
@@ -1002,7 +1010,8 @@ exports.getEditIssue = (req, res, next) => {
             pathAgain: '/issues',
             id: projectId,
             members: members.rows,
-            issues: issue.rows[0]
+            issues: issue.rows[0],
+            moment
           });
         })
         .catch(err => console.log(err));
