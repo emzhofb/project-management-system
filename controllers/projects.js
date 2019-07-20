@@ -43,17 +43,10 @@ exports.getProjects = (req, res, next) => {
       member
         .findAllMembers()
         .then(members => {
-          let sql = `SELECT COUNT(id) as total 
-          FROM (SELECT DISTINCT projects.projectid AS id 
-            FROM projects 
-            LEFT JOIN members 
-            ON projects.projectid = members.projectid 
-            LEFT JOIN users 
-            ON members.userid = users.userid`;
+          let sql = `SELECT count(*) FROM public.projects`;
           if (filter) {
             sql += ` WHERE ${filterProject.join(' AND ')}`;
           }
-          sql += `) AS projectmember`;
 
           const page = Number(req.query.page) || 1;
           const perPage = 3;
@@ -61,19 +54,13 @@ exports.getProjects = (req, res, next) => {
           pool
             .query(sql)
             .then(count => {
-              const total = count.rows[0].total;
+              const total = count.rows[0].count;
               const pages = Math.ceil(total / perPage);
               const offset = (page - 1) * perPage;
               const url =
                 req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
 
-              sql = `SELECT DISTINCT 
-              projects.projectid, projects.projectname 
-              FROM projects 
-              LEFT JOIN members 
-              ON projects.projectid = members.projectid 
-              LEFT JOIN users 
-              ON members.userid = users.userid`;
+              sql = `SELECT * FROM public.projects`;
               if (filter) {
                 sql += ` WHERE ${filterProject.join(' AND ')}`;
               }
