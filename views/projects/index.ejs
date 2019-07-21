@@ -157,24 +157,22 @@
               <% } %>
             </td>
             <% } %>
-            <% if (privilage) { %>
-              <td>
-                <a href="/projects/edit/<%= project.projectid %>">
-                  <button type="button" class="btn btn-success">
-                    Edit
-                  </button>
-                </a>
-                <a
-                  href="/projects/delete/<%= project.projectid %>"
-                  style="color: white"
-                  onclick="return confirm('Delete ?')"
-                >
-                  <button type="button" class="btn btn-danger">
-                    Delete
-                  </button>
-                </a>
-              </td>
-            <% } %>
+            <td>
+              <a href="/projects/edit/<%= project.projectid %>">
+                <button type="button" class="btn btn-success">
+                  Edit
+                </button>
+              </a>
+              <a
+                href="/projects/delete/<%= project.projectid %>"
+                style="color: white"
+                onclick="return confirm('Delete ?')"
+              >
+                <button type="button" class="btn btn-danger">
+                  Delete
+                </button>
+              </a>
+            </td>
           </tr>
           <% }) %>
         </tbody>
@@ -229,9 +227,7 @@
           </ul>
         <% } %>
       </nav>
-      <% if (privilage) { %>
-        <a href="add" class="btn btn-secondary">Add</a>
-      <% } %>
+      <a href="add" class="btn btn-secondary">Add</a>
     </div>
   </body>
 </html>

@@ -245,26 +245,24 @@
               <% } %> <% if (options.authorcolumn == 'on') { %>
               <td><%= issues[i].author %></td>
               <% } %>
-              <% if (privilage) { %>
-                <td>
-                  <a
-                    href="/projects/issues/edit/<%= id %>/<%= issues[i].issueid %>"
-                  >
-                    <button type="button" class="btn btn-success">
-                      Edit
-                    </button>
-                  </a>
-                  <a
-                    href="/projects/issues/delete/<%= id %>/<%= issues[i].issueid %>"
-                    style="color: white"
-                    onclick="return confirm('Delete ?')"
-                  >
-                    <button type="button" class="btn btn-danger">
-                      Delete
-                    </button>
-                  </a>
-                </td>
-              <% } %>
+              <td>
+                <a
+                  href="/projects/issues/edit/<%= id %>/<%= issues[i].issueid %>"
+                >
+                  <button type="button" class="btn btn-success">
+                    Edit
+                  </button>
+                </a>
+                <a
+                  href="/projects/issues/delete/<%= id %>/<%= issues[i].issueid %>"
+                  style="color: white"
+                  onclick="return confirm('Delete ?')"
+                >
+                  <button type="button" class="btn btn-danger">
+                    Delete
+                  </button>
+                </a>
+              </td>
             </tr>
             <% } %>
           </tbody>
@@ -328,9 +326,7 @@
           </ul>
           <% } %>
         </nav>
-        <% if (privilage) { %>
-          <a href="add/<%= id %>" class="btn btn-secondary">Add</a>
-        <% } %>
+        <a href="add/<%= id %>" class="btn btn-secondary">Add</a>
       </div>
     </div>
   </body>
