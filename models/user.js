@@ -78,4 +78,18 @@ module.exports = class User {
 
     return pool.query(sql);
   }
+
+  changePassword(email, password) {
+    let sql;
+    if (password) {
+      const saltRounds = 5;
+      const hashedPassword = bcrypt.hashSync(password, saltRounds);
+
+      sql = `UPDATE public.users
+      SET password='${hashedPassword}'
+      WHERE email = '${email}'`;
+    }
+
+    return pool.query(sql);
+  }
 };
