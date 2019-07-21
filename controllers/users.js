@@ -164,18 +164,36 @@ exports.postProfile = (req, res, next) => {
 };
 
 exports.getUser = (req, res, next) => {
-  const user = new User();
+  let countUser = `SELECT count(*) FROM public.users`;
 
-  user
-    .findAll()
-    .then(users => {
-      res.render('user/list', {
-        title: 'Users',
-        path: '/users',
-        users: users.rows,
-        query: req.query,
-        helpers
-      });
+  pool
+    .query(countUser)
+    .then(count => {
+      const page = Number(req.query.page) || 1;
+      const perPage = 3;
+      const total = count.rows[0].count;
+      const pages = Math.ceil(total / perPage);
+      const offset = (page - 1) * perPage;
+      const url = req.url == `/` ? `/users/?page=1` : `/users${req.url}`;
+
+      let userSql = `SELECT * FROM public.users`;
+      userSql += ` ORDER BY userid LIMIT ${perPage} OFFSET ${offset}`;
+
+      pool
+        .query(userSql)
+        .then(users => {
+          res.render('user/list', {
+            title: 'Users',
+            path: '/users',
+            users: users.rows,
+            query: req.query,
+            helpers,
+            current: page,
+            pages,
+            url
+          });
+        })
+        .catch(err => console.log(err));
     })
     .catch(err => console.log(err));
 };

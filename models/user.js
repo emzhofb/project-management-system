@@ -30,6 +30,11 @@ module.exports = class User {
     return pool.query(sql);
   }
 
+  countAll() {
+    const sql = `SELECT count(*) FROM public.users`;
+    return pool.query(sql);
+  }
+  
   find() {
     const sql = `SELECT * FROM public.users WHERE email = '${this.email}'`;
     return pool.query(sql);
