@@ -13,59 +13,311 @@
     <%- include('../partials/navigation') %>
     <div class="container" style="padding: 20px">
       <h1><%= title %></h1>
-      <div class="container">
-        <div class="row">
-          <br />
-          <table class="table table-striped">
-            <thead>
-              <th scope="col">ID</th>
-              <th scope="col">Email</th>
-              <th scope="col">Name</th>
-              <th scope="col">Type</th>
-              <th scope="col">Role</th>
-              <th scope="col"></th>
-            </thead>
-            <tbody>
-              <% users.forEach(user => { %>
-              <tr>
-                <th scope="row">
-                  <%= user.userid %>
-                </th>
-                <td>
-                  <%= user.email %>
-                </td>
-                <td>
-                  <%= user.firstname + ' ' + user.lastname %>
-                </td>
-                <td>
-                  <% if (user.isfulltime == true) { %> Fulltime <% } else { %>
-                  Parttime <% } %>
-                </td>
-                <td>
-                  <%= helpers.displayPosition(user.roleid) %>
-                </td>
-                <td>
-                  <a href="/users/edit/<%= user.userid %>">
-                    <button type="button" class="btn btn-success">
-                      Edit
-                    </button>
-                  </a>
-                  <a
-                    href="/users/delete/<%= user.userid %>"
-                    style="color: white"
-                    onclick="return confirm('Delete ?')"
-                  >
-                    <button type="button" class="btn btn-danger">
-                      Delete
-                    </button>
-                  </a>
-                </td>
-              </tr>
-              <% }) %>
-            </tbody>
-          </table>
+      <h2>Filters</h2>
+      <form action="/users" method="GET">
+        <input type="hidden" name="page" value="1">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="idChecked"
+                  <%= query.idChecked == 'on' ? 'checked' : '' %>
+                />
+                ID
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="id"
+                  name="id"
+                  placeholder="ID"
+                  value="<%= query.id && query.idChecked == 'on' ? query.id : '' %>"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="emailChecked"
+                  <%= query.emailChecked == 'on' ? 'checked' : '' %>
+                />
+                Email
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  placeholder="Email"
+                  value="<%= query.email && query.emailChecked == 'on' ? query.email : '' %>"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="nameChecked"
+                  <%= query.nameChecked == 'on' ? 'checked' : '' %>
+                />
+                Name
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  placeholder="Name"
+                  value="<%= query.name && query.nameChecked == 'on' ? query.name : '' %>"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="typeChecked"
+                  <%= query.type && query.typeChecked == 'on' ? 'checked' : '' %>
+                />Type
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <select class="form-control" name="type" id="type">
+                <option>Choose types...</option>
+                <option 
+                  value="true"
+                  <% if (query.type == 'true') { %>
+                    selected
+                  <% } %>
+                >Fulltime</option>
+                <option 
+                  value="false"
+                  <% if (query.type == 'false') { %>
+                    selected
+                  <% } %>
+                >Parttime</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="roleChecked"
+                  <%= query.roleChecked == 'on' ? 'checked' : '' %>
+                />Role
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <select class="form-control" name="role" id="role">
+                <option>Choose roles...</option>
+                <option 
+                  value="1"
+                  <% if (query.role == 1) { %>
+                    selected
+                  <% } %>
+                >Manager</option>
+                <option 
+                  value="2"
+                  <% if (query.role == 2) { %>
+                    selected
+                  <% } %>
+                >Programmer</option>
+                <option 
+                  value="3"
+                  <% if (query.role == 3) { %>
+                    selected
+                  <% } %>
+                >Quality Assurance</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+          <a href="/users" class="btn btn-info">Reset</a>
         </div>
-      </div>
+      </form>
+      <br />
+      <form action="/users/column" method="GET">
+        <div class="container">
+          <h2>Options</h2>
+          <div class="row">
+            <div class="col-sm-2">
+              <p>Columns</p>
+            </div>
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="idChecked"
+                <%= options.idCheckedColumn == 'on' ? 'checked' : '' %> /> ID
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                name="emailChecked" <%= options.emailCheckedColumn == 'on' ?
+                'checked' : '' %> /> Email
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                name="nameChecked" <%= options.nameCheckedColumn == 'on' ?
+                'checked' : '' %> /> Name
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                name="typeChecked" <%= options.typeCheckedColumn == 'on' ?
+                'checked' : '' %> /> Type
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                name="roleChecked" <%= options.roleCheckedColumn == 'on' ?
+                'checked' : '' %> /> Role
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-warning">Apply</button>
+        </div>
+      </form>
+      <br />
+      <table class="table table-striped">
+        <thead>
+          <% if (options.idCheckedColumn == 'on') { %>
+          <th scope="col">ID</th>
+          <% } %> <% if (options.emailCheckedColumn == 'on') { %>
+          <th scope="col">Email</th>
+          <% } %> <% if (options.nameCheckedColumn == 'on') { %>
+          <th scope="col">Name</th>
+          <% } %> <% if (options.typeCheckedColumn == 'on') { %>
+          <th scope="col">Type</th>
+          <% } %> <% if (options.roleCheckedColumn == 'on') { %>
+          <th scope="col">Role</th>
+          <% } %>
+          <th scope="col"></th>
+        </thead>
+        <tbody>
+          <% users.forEach(user => { %>
+          <tr>
+            <% if (options.idCheckedColumn == 'on') { %>
+            <th scope="row">
+              <%= user.userid %>
+            </th>
+            <% } %> <% if (options.emailCheckedColumn == 'on') { %>
+            <td>
+              <%= user.email %>
+            </td>
+            <% } %> <% if (options.nameCheckedColumn == 'on') { %>
+            <td>
+              <%= user.firstname + ' ' + user.lastname %>
+            </td>
+            <% } %> <% if (options.typeCheckedColumn == 'on') { %>
+            <td>
+              <% if (user.isfulltime == true) { %> Fulltime <% } else { %>
+              Parttime <% } %>
+            </td>
+            <% } %> <% if (options.roleCheckedColumn == 'on') { %>
+            <td>
+              <%= helpers.displayPosition(user.roleid) %>
+            </td>
+            <% } %>
+            <td>
+              <a href="/users/edit/<%= user.userid %>">
+                <button type="button" class="btn btn-success">
+                  Edit
+                </button>
+              </a>
+              <a
+                href="/users/delete/<%= user.userid %>"
+                style="color: white"
+                onclick="return confirm('Delete ?')"
+              >
+                <button type="button" class="btn btn-danger">
+                  Delete
+                </button>
+              </a>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <nav aria-label="...">
+        <% if (pages > 0) { %>
+        <ul class="pagination">
+          <% if (current == 1) { %>
+          <li class="page-item disabled">
+            <a class="page-link">First</a>
+          </li>
+          <% } else { %>
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="<%= url.replace(`?page=${current}`, `?page=1`) %>"
+              >First</a
+            >
+          </li>
+          <% } %> <% let i = (Number(current) > 3 ? Number(current) - 2 : 1) %>
+          <% if (i !== 1) { %>
+          <li class="page-item disabled">
+            <a>...</a>
+          </li>
+          <% } %> <% for (; i <= (Number(current) + 2) && i <= pages; i++) { %>
+          <% if (i == current) { %>
+          <li class="page-item active" aria-current="page">
+            <a
+              class="page-link"
+              href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>"
+              name="page"
+              ><%= i %><span class="sr-only">(current)</span></a
+            >
+          </li>
+          <% } else { %>
+          <li class="page-item" aria-current="page">
+            <a
+              class="page-link"
+              href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>"
+              name="page"
+              ><%= i %><span class="sr-only">(current)</span></a
+            >
+          </li>
+          <% } %> <% } %> <% if (i == Number(current) + 3 && i < pages) { %>
+          <li class="page-item disabled">
+            <a>...</a>
+          </li>
+          <% } %> <% if (current == pages) { %>
+          <li class="page-item disabled">
+            <a class="page-link">Last</a>
+          </li>
+          <% } else { %>
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="<%= url.replace(`?page=${current}`, `?page=${pages}`) %>"
+              >Last</a
+            >
+          </li>
+          <% } %>
+        </ul>
+        <% } %>
+      </nav>
       <a href="/users/register" class="btn btn-secondary">Add</a>
     </div>
   </body>

@@ -9,6 +9,7 @@ router.get('/', checkAuth, controller.getUser);
 router.get('/edit/:id', checkAuth, controller.getEditUser);
 router.post('/edit/:id', controller.postEditUser);
 router.get('/delete/:id', checkAuth, controller.getDeleteUser);
+router.get('/column', controller.getUserColumn);
 router.get('/login', controller.getLogin);
 router.post('/login', controller.postLogin);
 router.get('/register', checkAuth, controller.getRegister);
