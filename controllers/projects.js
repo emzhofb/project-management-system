@@ -99,7 +99,8 @@ exports.getProjects = (req, res, next) => {
                         query: req.query,
                         current: page,
                         pages,
-                        url
+                        url,
+                        privilage: req.session.user.isadmin
                       });
                     })
                     .catch(err => console.log(err));
@@ -122,7 +123,8 @@ exports.getAddProject = (req, res, next) => {
       res.render('projects/add', {
         title: 'Add Project',
         members: members.rows,
-        path: '/projects'
+        path: '/projects',
+        privilage: req.session.user.isadmin
       });
     })
     .catch(err => console.log(err));
@@ -211,7 +213,8 @@ exports.getEditProject = (req, res, next) => {
                 members: members.rows,
                 projectname: project.rows[0].projectname,
                 membername: name,
-                helpers: helpers
+                helpers: helpers,
+                privilage: req.session.user.isadmin
               });
             })
             .catch(err => console.log(err));
@@ -380,7 +383,8 @@ exports.getDetailProject = (req, res, next) => {
                                 totalOpenFeature:
                                   totalOpenFeature.rows[0].count,
                                 totalSupport: totalSupport.rows[0].count,
-                                totalOpenSupport: totalOpenSupport.rows[0].count
+                                totalOpenSupport: totalOpenSupport.rows[0].count,
+                                privilage: req.session.user.isadmin
                               });
                             })
                             .catch(err => console.log(err));
@@ -491,7 +495,8 @@ exports.getMemberProject = (req, res, next) => {
                     helpers: helpers,
                     current: page,
                     pages,
-                    url
+                    url,
+                    privilage: req.session.user.isadmin
                   });
                 })
                 .catch(err => console.log(err));
@@ -541,7 +546,8 @@ exports.getAddMember = (req, res, next) => {
                 pathAgain: '/members',
                 id: id,
                 members: listMember,
-                roles: roles.rows
+                roles: roles.rows,
+                privilage: req.session.user.isadmin
               });
             })
             .catch(err => console.log(err));
@@ -640,7 +646,8 @@ exports.getEditMember = (req, res, next) => {
                 id: id,
                 member: theuser.rows,
                 roles: roles.rows,
-                roleid: themember.rows[0].roleid
+                roleid: themember.rows[0].roleid,
+                privilage: req.session.user.isadmin
               });
             })
             .catch(err => console.log(err));
@@ -817,7 +824,8 @@ exports.getIssueProject = (req, res, next) => {
                   estimatedtime,
                   donecolumn,
                   authorcolumn
-                }
+                },
+                privilage: req.session.user.isadmin
               });
             })
             .catch(err => console.log(err));
@@ -839,7 +847,8 @@ exports.getAddIssue = (req, res, next) => {
         path: '/projects',
         pathAgain: '/issues',
         id: projectId,
-        members: members.rows
+        members: members.rows,
+        privilage: req.session.user.isadmin
       });
     })
     .catch(err => console.log(err));
@@ -1011,7 +1020,8 @@ exports.getEditIssue = (req, res, next) => {
             id: projectId,
             members: members.rows,
             issues: issue.rows[0],
-            moment
+            moment,
+            privilage: req.session.user.isadmin
           });
         })
         .catch(err => console.log(err));
@@ -1132,7 +1142,8 @@ exports.getActivity = (req, res, next) => {
         lastWeek: helpers.displayDate(lastWeek),
         thisDay: helpers.displayDate(thisDay),
         helpers,
-        moment
+        moment,
+        privilage: req.session.user.isadmin
       });
     })
     .catch(err => console.log(err));
