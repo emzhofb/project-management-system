@@ -26,7 +26,8 @@ exports.postLogin = (req, res, next) => {
           req.session.user = {
             email: result.rows[0].email,
             userid: result.rows[0].userid,
-            fullname: result.rows[0].firstname + ' ' + result.rows[0].lastname
+            fullname: result.rows[0].firstname + ' ' + result.rows[0].lastname,
+            isadmin: result.rows[0].isadmin
           };
 
           const thisDay = moment().format();
@@ -123,7 +124,8 @@ exports.getProfile = (req, res, next) => {
             title: 'User Profile',
             user: users.rows[0],
             roles: roles.rows,
-            path: '/users/profile'
+            path: '/users/profile',
+            privilage: req.session.user.isadmin
           });
         })
         .catch(err => console.log(err));
@@ -261,7 +263,8 @@ exports.getUser = (req, res, next) => {
                 helpers,
                 current: page,
                 pages,
-                url
+                url,
+                privilage: req.session.user.isadmin
               });
             })
             .catch(err => console.log(err));
@@ -289,7 +292,8 @@ exports.getEditUser = (req, res, next) => {
             roles: roles.rows,
             query: req.query,
             helpers,
-            userid: id
+            userid: id,
+            privilage: req.session.user.isadmin
           });
         })
         .catch(err => console.log(err));
