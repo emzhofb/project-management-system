@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user');
 const Role = require('../models/role');
 const Activity = require('../models/activity');
+const UserOption = require('../models/useroption');
 const helpers = require('../helpers/function');
 const pool = require('../util/database');
 
@@ -164,34 +165,106 @@ exports.postProfile = (req, res, next) => {
 };
 
 exports.getUser = (req, res, next) => {
+  const userOption = new UserOption();
+  const {
+    idChecked,
+    id,
+    emailChecked,
+    email,
+    nameChecked,
+    name,
+    typeChecked,
+    type,
+    roleChecked,
+    role
+  } = req.query;
+
+  const filterUser = [];
+  let filter = false;
+
+  if (idChecked && id) {
+    if (Number(id)) {
+      filter = true;
+      filterUser.push(`users.userid = ${Number(id)}`);
+    }
+  }
+  if (emailChecked && email) {
+    filter = true;
+    filterUser.push(`users.email = '${email}'`);
+  }
+  if (nameChecked && name) {
+    filter = true;
+    filterUser.push(
+      `CONCAT(users.firstname, ' ', users.lastname) ILIKE '%${name}%'`
+    );
+  }
+  if (typeChecked && type) {
+    filter = true;
+    const newType = type == 'true' ? true : false;
+    filterUser.push(`users.isfulltime = '${newType}'`);
+  }
+  if (roleChecked && role) {
+    if (Number(role)) {
+      filter = true;
+      filterUser.push(`users.roleid = ${Number(role)}`);
+    }
+  }
+
   let countUser = `SELECT count(*) FROM public.users`;
 
-  pool
-    .query(countUser)
-    .then(count => {
-      const page = Number(req.query.page) || 1;
-      const perPage = 3;
-      const total = count.rows[0].count;
-      const pages = Math.ceil(total / perPage);
-      const offset = (page - 1) * perPage;
-      const url = req.url == `/` ? `/users/?page=1` : `/users${req.url}`;
+  if (filter) {
+    countUser += ` WHERE ${filterUser.join(' AND ')}`;
+  }
 
-      let userSql = `SELECT * FROM public.users`;
-      userSql += ` ORDER BY userid LIMIT ${perPage} OFFSET ${offset}`;
+  userOption
+    .findQuery()
+    .then(allQueries => {
+      const emailCheckedColumn = allQueries.rows[0].emailcolumn;
+      const nameCheckedColumn = allQueries.rows[0].namecolumn;
+      const typeCheckedColumn = allQueries.rows[0].typecolumn;
+      const roleCheckedColumn = allQueries.rows[0].rolecolumn;
+      const idCheckedColumn = allQueries.rows[0].idcolumn;
 
       pool
-        .query(userSql)
-        .then(users => {
-          res.render('user/list', {
-            title: 'Users',
-            path: '/users',
-            users: users.rows,
-            query: req.query,
-            helpers,
-            current: page,
-            pages,
-            url
-          });
+        .query(countUser)
+        .then(count => {
+          const page = Number(req.query.page) || 1;
+          const perPage = 3;
+          const total = count.rows[0].count;
+          const pages = Math.ceil(total / perPage);
+          const offset = (page - 1) * perPage;
+          const url = req.url == `/` ? `/users/?page=1` : `/users${req.url}`;
+
+          let userSql = `SELECT * FROM public.users`;
+
+          if (filter) {
+            userSql += ` WHERE ${filterUser.join(' AND ')}`;
+          }
+          
+          userSql += ` ORDER BY userid LIMIT ${perPage} OFFSET ${offset}`;
+
+          pool
+            .query(userSql)
+            .then(users => {
+              res.render('user/list', {
+                title: 'Users',
+                path: '/users',
+                users: users.rows,
+                query: req.query,
+                options: {
+                  emailCheckedColumn,
+                  nameCheckedColumn,
+                  typeCheckedColumn,
+                  roleCheckedColumn,
+                  idCheckedColumn
+                },
+                helpers,
+                current: page,
+                pages,
+                url
+              });
+            })
+            .catch(err => console.log(err));
         })
         .catch(err => console.log(err));
     })
@@ -259,6 +332,35 @@ exports.getDeleteUser = (req, res, next) => {
 
   pool
     .query(sql)
+    .then(() => res.redirect('/users'))
+    .catch(err => console.log(err));
+};
+
+exports.getUserColumn = (req, res, next) => {
+  const {
+    idChecked,
+    emailChecked,
+    nameChecked,
+    typeChecked,
+    roleChecked
+  } = req.query;
+
+  const columnid = idChecked ? 'on' : 'off';
+  const columnemail = emailChecked ? 'on' : 'off';
+  const columnname = nameChecked ? 'on' : 'off';
+  const columntype = typeChecked ? 'on' : 'off';
+  const columnrole = roleChecked ? 'on' : 'off';
+
+  const useroption = new UserOption(
+    columnemail,
+    columnname,
+    columntype,
+    columnrole,
+    columnid
+  );
+
+  useroption
+    .updateQuery()
     .then(() => res.redirect('/users'))
     .catch(err => console.log(err));
 };
