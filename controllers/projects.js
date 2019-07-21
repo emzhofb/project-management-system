@@ -422,7 +422,7 @@ exports.getMemberProject = (req, res, next) => {
   }
   if (nameChecked && name) {
     filter = true;
-    filterMember.push(`users.firstname ILIKE '%${name}%' `);
+    filterMember.push(`CONCAT(users.firstname, ' ', users.lastname) ILIKE '%${name}%' `);
   }
   if (positionChecked && position) {
     filter = true;
