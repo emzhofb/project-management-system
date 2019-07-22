@@ -83,11 +83,11 @@
                 <option>Choose members...</option>
                 <% members.forEach(member => { %>
                 <option 
-                  value="<%= member.firstname %>"
-                  <% if (query.memberFilter == member.firstname) { %>
+                  value="<%= member.fullname %>"
+                  <% if (query.memberFilter == member.fullname) { %>
                     selected
                   <% } %>
-                  ><%= member.firstname + ' ' + member.lastname %></option
+                  ><%= member.fullname %></option
                 >
                 <% }) %>
               </select>
@@ -150,11 +150,7 @@
             <td><%= project.projectname %></td>
             <% } %> <% if (options.memberCheckedColumn == 'on') { %>
             <td>
-              <% for (let i = 0; i < projectmember.length; i++) { %>
-                <% if (project.projectname == projectmember[i].projectname) { %>
-                  <%= projectmember[i].firstname + ' ' + projectmember[i].lastname %>.
-                <% } %>
-              <% } %>
+              <%= project.members %> 
             </td>
             <% } %>
             <td>
