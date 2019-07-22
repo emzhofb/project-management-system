@@ -32,6 +32,10 @@ exports.getProjects = (req, res, next) => {
     filter = true;
     filterProject.push(`projects.projectname ILIKE '%${name}%'`);
   }
+  if (memberChecked && memberFilter) {
+    filter = true;
+    filterProject.push(`users.firstname = '${memberFilter}'`);
+  }
 
   queries
     .findQuery()
@@ -43,10 +47,19 @@ exports.getProjects = (req, res, next) => {
       member
         .findAllMembers()
         .then(members => {
-          let sql = `SELECT count(*) FROM public.projects`;
+          let sql = `SELECT DISTINCT count(*) FROM public.projects`;
+
+          for (let i = 0; i < filterProject.length; i++) {
+            if (filterProject[i] == `users.firstname = '${memberFilter}'`) {
+              sql += ', public.users, public.members';
+            }
+          }
+
           if (filter) {
             sql += ` WHERE ${filterProject.join(' AND ')}`;
           }
+
+          console.log(sql);
 
           const page = Number(req.query.page) || 1;
           const perPage = 3;
@@ -60,27 +73,26 @@ exports.getProjects = (req, res, next) => {
               const url =
                 req.url == '/' ? '/projects/?page=1' : `/projects${req.url}`;
 
-              sql = `SELECT * FROM public.projects`;
+              sql = `SELECT DISTINCT * FROM public.projects`;
+              for (let i = 0; i < filterProject.length; i++) {
+                if (filterProject[i] == `users.firstname = '${memberFilter}'`) {
+                  sql += ', public.users, public.members';
+                }
+              }
               if (filter) {
                 sql += ` WHERE ${filterProject.join(' AND ')}`;
               }
               sql += ` ORDER BY projects.projectid LIMIT ${perPage} OFFSET ${offset}`;
 
+              console.log(sql);
+
               pool
                 .query(sql)
                 .then(projects => {
-                  let sqlMember = `SELECT firstname, lastname, projectname 
-            FROM public.users, public.members, public.projects
-            WHERE projects.projectid = members.projectid
-            AND members.userid = users.userid`;
-                  const filterMember = [];
-
-                  if (memberChecked && memberFilter) {
-                    filterMember.push(`'${memberFilter}'`);
-                  }
-                  if (filterMember.length > 0) {
-                    sqlMember += ` AND users.firstname = ${filterMember[0]}`;
-                  }
+                  let sqlMember = `SELECT * 
+                  FROM public.users, public.members, public.projects
+                  WHERE projects.projectid = members.projectid
+                  AND members.userid = users.userid`;
 
                   pool
                     .query(sqlMember)
@@ -383,7 +395,8 @@ exports.getDetailProject = (req, res, next) => {
                                 totalOpenFeature:
                                   totalOpenFeature.rows[0].count,
                                 totalSupport: totalSupport.rows[0].count,
-                                totalOpenSupport: totalOpenSupport.rows[0].count,
+                                totalOpenSupport:
+                                  totalOpenSupport.rows[0].count,
                                 privilage: req.session.user.isadmin
                               });
                             })
@@ -426,7 +439,9 @@ exports.getMemberProject = (req, res, next) => {
   }
   if (nameChecked && name) {
     filter = true;
-    filterMember.push(`CONCAT(users.firstname, ' ', users.lastname) ILIKE '%${name}%' `);
+    filterMember.push(
+      `CONCAT(users.firstname, ' ', users.lastname) ILIKE '%${name}%' `
+    );
   }
   if (positionChecked && position) {
     filter = true;
