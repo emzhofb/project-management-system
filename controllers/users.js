@@ -63,7 +63,8 @@ exports.getRegister = (req, res, next) => {
       res.render('auth/register', {
         title: 'Register',
         roles: roles.rows,
-        path: '/users'
+        path: '/users',
+        privilage: req.session.user.isadmin
       });
     })
     .catch(err => console.log(err));

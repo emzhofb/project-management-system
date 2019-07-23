@@ -242,7 +242,8 @@ exports.getEditProject = (req, res, next) => {
                 projectname: project.rows[0].projectname,
                 membername: name,
                 helpers: helpers,
-                privilage: req.session.user.isadmin
+                privilage: req.session.user.isadmin,
+                id: req.params.id
               });
             })
             .catch(err => console.log(err));
@@ -505,7 +506,7 @@ exports.getMemberProject = (req, res, next) => {
                 findMember += ` AND ${filterMember.join(' AND ')}`;
               }
 
-              findMember += ` LIMIT ${perPage} OFFSET ${offset}`;
+              findMember += ` ORDER BY members.memberid LIMIT ${perPage} OFFSET ${offset}`;
 
               pool
                 .query(findMember)
@@ -1029,9 +1030,8 @@ exports.getEditIssue = (req, res, next) => {
   const projectId = req.params.id;
   const sql = `SELECT * FROM public.issues, public.users 
   WHERE issueid = ${issueid}
-  AND users.userid = author
   AND issues.projectid = ${projectId}`;
-
+  
   pool
     .query(sql)
     .then(issue => {
@@ -1052,6 +1052,7 @@ exports.getEditIssue = (req, res, next) => {
             members: members.rows,
             issues: issue.rows[0],
             moment,
+            issueid,
             privilage: req.session.user.isadmin
           });
         })
@@ -1104,13 +1105,13 @@ exports.postEditIssue = (req, res, next) => {
         const assigneeSql = `SELECT userid
           FROM public.members
           WHERE memberid = ${assigne}`;
-
+          
         pool
           .query(assigneeSql)
           .then(assigneId => {
             const authorSql = `SELECT userid
               FROM public.members
-              WHERE memberid = ${author}`;
+              WHERE memberid = ${assigne}`;
 
             pool
               .query(authorSql)
@@ -1131,7 +1132,7 @@ exports.postEditIssue = (req, res, next) => {
                     createddate='${createddate}', updateddate='${updateddate}', 
                     closeddate='${closeddate}', parenttask=${parenttask}
                     WHERE issueid=${issueid}`;
-
+                    
                 pool
                   .query(sql)
                   .then(() => {
