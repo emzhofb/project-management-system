@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../../../partials/navigation') %>
+    <div class="row" style="padding: 20px">
+      <div class="col">
+        <%- include('../../../partials/sidebar') %>
+      </div>
+      <div class="col-10">
+        <div class="container">
+          <h1><b><%= title %></b></h1>
+          <h2>Filters</h2>
+          <form action="/projects/issues/<%= id %>" method="GET">
+            <input type="hidden" name="page" value="1" />
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                    name="idFilter" <%= query.idFilter == 'on' ? 'checked' :
+                    ''%> /> ID
+                  </div>
+                </div>
+                <div class="col-sm-8">
+                  <div class="form-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="id"
+                      name="id"
+                      placeholder="ID"
+                      value="<%= query.id && query.idFilter == 'on' ? query.id : ''%>"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                    name="subjectFilter" <%= query.subjectFilter == 'on' ?
+                    'checked' : ''%> /> Subject
+                  </div>
+                </div>
+                <div class="col-sm-8">
+                  <div class="form-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="subject"
+                      name="subject"
+                      placeholder="Subject"
+                      value="<%= query.subject && query.subjectFilter == 'on' ? query.subject : ''%>"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-sm-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox"
+                    name="trackerFilter" <%= query.trackerFilter == 'on' ?
+                    'checked' : ''%> />Tracker
+                  </div>
+                </div>
+                <div class="form-group col-md-3">
+                  <select class="form-control" name="tracker" id="tracker">
+                    <option>Choose tracker...</option>
+                    <option value="Bug"
+                    <% if (query.tracker == "Bug") { %>
+                      selected
+                    <% } %>
+                    >
+                      Bug
+                    </option>
+                    <option value="Feature"
+                    <% if (query.tracker == "Feature") { %>
+                      selected
+                    <% } %>
+                    >
+                      Feature
+                    </option>
+                    <option value="Support"
+                    <% if (query.tracker == "Support") { %>
+                      selected
+                    <% } %>
+                    >
+                      Support
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Search</button>
+              <a href="/projects/issues/<%= id %>" class="btn btn-info"
+                >Reset</a
+              >
+            </div>
+          </form>
+        </div>
+        <br />
+        <form action="/projects/issues/column/<%= id %>" method="GET">
+          <div class="container">
+            <h2>Options</h2>
+            <div class="row">
+              <div class="col-sm-2">
+                <p>Columns</p>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="idChecked" <%= options.idcolumn == 'on' ? 'checked' : ''
+                  %>/> ID
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="trackerChecked" <%= options.trackercolumn == 'on' ?
+                  'checked' : '' %>/> Tracker
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="subjectChecked" <%= options.subjectcolumn == 'on' ?
+                  'checked' : '' %>/> Subject
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="descriptionChecked" <%= options.descriptioncolumn ==
+                  'on' ? 'checked' : '' %>/> Description
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="statusChecked" <%= options.statuscolumn == 'on' ?
+                  'checked' : '' %>/> Status
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="priorityChecked" <%= options.prioritycolumn == 'on' ?
+                  'checked' : '' %>/> Priority
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="assigneeChecked" <%= options.assigneecolumn == 'on' ?
+                  'checked' : '' %>/> Assignee
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="startdateChecked" <%= options.startdatecolumn == 'on' ?
+                  'checked' : '' %>/> Start Date
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="duedateChecked" <%= options.duedatecolumn == 'on' ?
+                  'checked' : '' %>/> Due Date
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="estimatedChecked" <%= options.estimatedtime == 'on' ?
+                  'checked' : '' %>/> Estimated Time
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="doneChecked" <%= options.donecolumn == 'on' ? 'checked'
+                  : '' %>/> Done
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox"
+                  name="authorChecked" <%= options.authorcolumn == 'on' ?
+                  'checked' : '' %>/> Author
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-warning">Apply</button>
+          </div>
+        </form>
+        <br />
+        <table class="table table-striped">
+          <thead>
+            <% if (options.idcolumn == 'on') { %>
+            <th scope="col">ID</th>
+            <% } %> <% if (options.trackercolumn == 'on') { %>
+            <th scope="col">Tracker</th>
+            <% } %> <% if (options.subjectcolumn == 'on') { %>
+            <th scope="col">Subject</th>
+            <% } %> <% if (options.descriptioncolumn == 'on') { %>
+            <th scope="col">Description</th>
+            <% } %> <% if (options.statuscolumn == 'on') { %>
+            <th scope="col">Status</th>
+            <% } %> <% if (options.prioritycolumn == 'on') { %>
+            <th scope="col">Priority</th>
+            <% } %> <% if (options.assigneecolumn == 'on') { %>
+            <th scope="col">Assignee</th>
+            <% } %> <% if (options.startdatecolumn == 'on') { %>
+            <th scope="col">Start Date</th>
+            <% } %> <% if (options.duedatecolumn == 'on') { %>
+            <th scope="col">Due Date</th>
+            <% } %> <% if (options.estimatedtime == 'on') { %>
+            <th scope="col">Estimated Time</th>
+            <% } %> <% if (options.donecolumn == 'on') { %>
+            <th scope="col">Done</th>
+            <% } %> <% if (options.authorcolumn == 'on') { %>
+            <th scope="col">Author</th>
+            <% } %>
+          </thead>
+          <tbody>
+            <% for (let i = 0; i < issues.length; i++) { %>
+            <tr>
+              <% if (options.idcolumn == 'on') { %>
+              <th scope="row">
+                <%= issues[i].issueid %>
+              </th>
+              <% } %> <% if (options.trackercolumn == 'on') { %>
+              <td><%= issues[i].tracker %></td>
+              <% } %> <% if (options.subjectcolumn == 'on') { %>
+              <td><%= issues[i].subject %></td>
+              <% } %> <% if (options.descriptioncolumn == 'on') { %>
+              <td><%= issues[i].description %></td>
+              <% } %> <% if (options.statuscolumn == 'on') { %>
+              <td><%= issues[i].status %></td>
+              <% } %> <% if (options.prioritycolumn == 'on') { %>
+              <td><%= issues[i].priority %></td>
+              <% } %> <% if (options.assigneecolumn == 'on') { %>
+              <td><%= issues[i].assignee %></td>
+              <% } %> <% if (options.startdatecolumn == 'on') { %>
+              <td><%= issues[i].startdate %></td>
+              <% } %> <% if (options.duedatecolumn == 'on') { %>
+              <td><%= issues[i].duedate %></td>
+              <% } %> <% if (options.estimatedtime == 'on') { %>
+              <td><%= issues[i].estimatedtime %></td>
+              <% } %> <% if (options.donecolumn == 'on') { %>
+              <td><%= issues[i].done %></td>
+              <% } %> <% if (options.authorcolumn == 'on') { %>
+              <td><%= issues[i].author %></td>
+              <% } %>
+              <td>
+                <a
+                  href="/projects/issues/edit/<%= id %>/<%= issues[i].issueid %>"
+                >
+                  <button type="button" class="btn btn-success">
+                    Edit
+                  </button>
+                </a>
+                <a
+                  href="/projects/issues/delete/<%= id %>/<%= issues[i].issueid %>"
+                  style="color: white"
+                  onclick="return confirm('Delete ?')"
+                >
+                  <button type="button" class="btn btn-danger">
+                    Delete
+                  </button>
+                </a>
+              </td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+        <nav aria-label="...">
+          <% if (pages > 0) { %>
+          <ul class="pagination">
+            <% if (current == 1) { %>
+            <li class="page-item disabled">
+              <a class="page-link">First</a>
+            </li>
+            <% } else { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="<%= url.replace(`?page=${current}`, `?page=1`) %>"
+                >First</a
+              >
+            </li>
+            <% } %> <% let i = (Number(current) > 3 ? Number(current) - 2 : 1)
+            %> <% if (i !== 1) { %>
+            <li class="page-item disabled">
+              <a>...</a>
+            </li>
+            <% } %> <% for (; i <= (Number(current) + 2) && i <= pages; i++) {
+            %> <% if (i == current) { %>
+            <li class="page-item active" aria-current="page">
+              <a
+                class="page-link"
+                href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>"
+                name="page"
+                ><%= i %><span class="sr-only">(current)</span></a
+              >
+            </li>
+            <% } else { %>
+            <li class="page-item" aria-current="page">
+              <a
+                class="page-link"
+                href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>"
+                name="page"
+                ><%= i %><span class="sr-only">(current)</span></a
+              >
+            </li>
+            <% } %> <% } %> <% if (i == Number(current) + 3 && i < pages) { %>
+            <li class="page-item disabled">
+              <a>...</a>
+            </li>
+            <% } %> <% if (current == pages) { %>
+            <li class="page-item disabled">
+              <a class="page-link">Last</a>
+            </li>
+            <% } else { %>
+            <li class="page-item">
+              <a
+                class="page-link"
+                href="<%= url.replace(`?page=${current}`, `?page=${pages}`) %>"
+                >Last</a
+              >
+            </li>
+            <% } %>
+          </ul>
+          <% } %>
+        </nav>
+        <a href="add/<%= id %>" class="btn btn-secondary">Add</a>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+      integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <%- include('../partials/navigation') %>
+    <div class="container" style="padding: 20px">
+      <h1><%= title %></h1>
+      <h2>Filters</h2>
+      <form action="/projects" method="GET">
+        <input type="hidden" name="page" value="1">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="idChecked"
+                  <%= query.idChecked == 'on' ? 'checked' : ''%>
+                />
+                ID
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="id"
+                  name="id"
+                  placeholder="ID"
+                  value="<%= query.id && query.idChecked == 'on' ? query.id : ''%>"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="nameChecked"
+                  <%= query.nameChecked == 'on' ? 'checked' : ''%>
+                />
+                Name
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  placeholder="Name"
+                  value="<%= query.name && query.nameChecked == 'on' ? query.name : ''%>"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  name="memberChecked"
+                  <%= query.memberChecked == 'on' ? 'checked' : ''%>
+                />Members
+              </div>
+            </div>
+            <div class="form-group col-md-3">
+              <select class="form-control" name="memberFilter" id="memberFilter">
+                <option>Choose members...</option>
+                <% members.forEach(member => { %>
+                <option 
+                  value="<%= member.fullname %>"
+                  <% if (query.memberFilter == member.fullname) { %>
+                    selected
+                  <% } %>
+                  ><%= member.fullname %></option
+                >
+                <% }) %>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Search</button>
+          <a href="/projects" class="btn btn-info">Reset</a>
+        </div>
+      </form>
+      <br />
+      <form action="/projects/column" method="GET">
+        <div class="container">
+          <h2>Options</h2>
+          <div class="row">
+            <div class="col-sm-2">
+              <p>Columns</p>
+            </div>
+            <div class="col-sm-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="idChecked"
+                <%= options.idCheckedColumn == 'on' ? 'checked' : '' %> /> ID
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                name="nameChecked" <%= options.nameCheckedColumn == 'on' ? 'checked' :
+                '' %> /> Name
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                name="memberChecked" <%= options.memberCheckedColumn == 'on' ?
+                'checked' : '' %> /> Members
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-warning">Apply</button>
+        </div>
+      </form>
+      <br />
+      <table class="table table-striped">
+        <thead>
+          <% if (options.idCheckedColumn == 'on') { %>
+          <th scope="col">ID</th>
+          <% } %> <% if (options.nameCheckedColumn == 'on') { %>
+          <th scope="col">Name</th>
+          <% } %> <% if (options.memberCheckedColumn == 'on') { %>
+          <th scope="col">Members</th>
+          <% } %>
+          <th scope="col"></th>
+        </thead>
+        <tbody>
+          <% projects.forEach(project => { %>
+          <tr>
+            <% if (options.idCheckedColumn == 'on') { %>
+            <th scope="row">
+              <a href="/projects/overview/<%= project.projectid %>"">
+                <%= project.projectid %>
+              </a>
+            </th>
+            <% } %> <% if (options.nameCheckedColumn == 'on') { %>
+            <td><%= project.projectname %></td>
+            <% } %> <% if (options.memberCheckedColumn == 'on') { %>
+            <td>
+              <%= project.members %> 
+            </td>
+            <% } %>
+            <td>
+              <a href="/projects/edit/<%= project.projectid %>">
+                <button type="button" class="btn btn-success">
+                  Edit
+                </button>
+              </a>
+              <a
+                href="/projects/delete/<%= project.projectid %>"
+                style="color: white"
+                onclick="return confirm('Delete ?')"
+              >
+                <button type="button" class="btn btn-danger">
+                  Delete
+                </button>
+              </a>
+            </td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <nav aria-label="...">
+        <% if (pages > 0) { %>
+          <ul class="pagination">
+            <% if (current == 1) { %>
+              <li class="page-item disabled">
+                <a class="page-link">First</a>
+              </li>
+            <% } else { %>
+              <li class="page-item">
+                <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=1`) %>" >First</a>
+              </li>
+            <% } %> 
+            <% let i = (Number(current) > 3 ? Number(current) - 2 : 1) %>
+            <% if (i !== 1) { %>
+              <li class="page-item disabled">
+                <a>...</a>
+              </li>
+            <% } %> 
+            <% for (; i <= (Number(current) + 2) && i <= pages; i++) { %>
+              <% if (i == current) { %>
+                <li class="page-item active" aria-current="page">
+                  <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>" name="page"
+                    ><%= i %><span class="sr-only">(current)</span></a
+                  >
+                </li>
+              <% } else { %>
+                <li class="page-item" aria-current="page">
+                  <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${i}`) %>" name="page"
+                    ><%= i %><span class="sr-only">(current)</span></a
+                  >
+                </li>
+              <% } %> 
+            <% } %> 
+            <% if (i == Number(current) + 3 && i < pages) { %>
+              <li class="page-item disabled">
+                <a>...</a>
+              </li>
+            <% } %> 
+            <% if (current == pages) { %>
+              <li class="page-item disabled">
+                <a class="page-link">Last</a>
+              </li>
+            <% } else { %>
+              <li class="page-item">
+                <a class="page-link" href="<%= url.replace(`?page=${current}`, `?page=${pages}`) %>">Last</a>
+              </li>
+            <% } %>
+          </ul>
+        <% } %>
+      </nav>
+      <a href="add" class="btn btn-secondary">Add</a>
+    </div>
+  </body>
+</html>
